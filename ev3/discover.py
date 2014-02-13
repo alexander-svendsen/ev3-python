@@ -9,7 +9,8 @@ class BrickNotFoundException(Exception):
 
 def connect_to_brick(ip, port):
     try:
-        socket = IpSocket().connect(ip, port)
+        socket = IpSocket()
+        socket.connect(ip, port)
         return Brick(socket)
     except:
         raise BrickNotFoundException("Did you provide the correct ip and port?")
