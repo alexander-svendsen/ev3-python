@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
 
-class IllegalArgumentError(ValueError):
+
+class IllegalArgumentException(ValueError):
     pass
