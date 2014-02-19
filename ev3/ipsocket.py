@@ -6,12 +6,23 @@ class IpSocket():
     def __init__(self):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self, addr, port, timeout=None):
-        self._socket.settimeout(timeout)
-        self._socket.connect((addr, port))
+    def _get_device_address_by_name(self, hostname, port):
+        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    def close(self):
-        self._socket.close()
+        # Use the Simple Service Discovery Protocol address for discovery
+        udp.bind(("239.255.255.250", port))
+
+        while True:
+            data, ip_address = udp.recvfrom(1024)  # todo how much data
+            if data == hostname:
+                return ip_address
+
+    def connect_by_hostname(self, hostname, port):
+        ip_address = self._get_device_address_by_name(hostname, port)
+        self.connect(ip_address, port)
+
+    def connect(self, addr, port):
+        self._socket.connect((addr, port))
 
     def send(self, data):
         self._socket.send(data)
@@ -20,13 +31,6 @@ class IpSocket():
         self._socket.settimeout(timeout)
         return self._socket.recv(length)
 
-    def getsockname(self):
-        return self._socket.getsockname()
+    def close(self):
+        self._socket.close()
 
-    @property
-    def connection(self):
-        return self._socket
-
-    @property
-    def gethostname(self):
-        return socket.gethostname()

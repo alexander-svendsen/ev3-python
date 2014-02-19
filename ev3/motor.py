@@ -1,29 +1,18 @@
 # -*- coding: utf-8 -*-
-from brick import Brick
+import collections
 import error
 import json
+
+from brick import Brick
 
 
 class InvalidMotorPortException(Exception):
     pass
 
 
-class MotorPorts(object):
-    """
-    Object to keep the valid ports stored
-    """
-    #future_todo: fix in the future when more ports can be connected
-    _valid_values = ["A", "B", "C", "D"]
-
-    def get_valid_ports(self):
-        return self._valid_values
-
-    def __contains__(self, item):
-        return item in self._valid_values
-
-    def __str__(self):
-        return ','.join(self._valid_values)
-
+#future_todo: fix in the future when more ports can be connected
+_motor_ports_named_tuple = collections.namedtuple('MotorPorts', "A B C D")
+MOTOR_PORTS = _motor_ports_named_tuple("A", "B", "C", "D")  # The only valid motor ports
 
 # REVIEW should i communicate like this?
 
@@ -36,14 +25,14 @@ class Motor():
         """
         @param brick: The brick the motor uses
         @param motor_port: Which motor port to use.
-        @see MotorPorts: Contains the valid motor ports to use, default A-D
+        @see MOTOR_PORTS: Contains the valid motor ports to use, default A-D
         @raise error.IllegalArgumentError: If any parameter is wrong this exception is raised
 
         @type brick: Brick
         @type motor_port: str
         """
 
-        if motor_port not in MotorPorts():
+        if motor_port not in MOTOR_PORTS:
             raise InvalidMotorPortException("Must be a valid motor port")
 
         if not isinstance(brick, Brick):

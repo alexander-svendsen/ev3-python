@@ -1,13 +1,13 @@
 import ev3
-from ev3 import Motor, MotorPorts
+from ev3 import Motor, MOTOR_PORTS
 
 import time
+
 
 #TODO do something smart with the port
 brick = ev3.connect_to_brick(ip='10.0.1.1', port=9200)
 a = Motor(brick, 'A')
 b = Motor(brick, 'B')
-
 # print "testing forward a"
 # a.forward()
 #

@@ -2,4 +2,4 @@
 
 from discover import connect_to_brick
 from brick import Brick
-from motor import MotorPorts, Motor
+from motor import MOTOR_PORTS, Motor
