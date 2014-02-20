@@ -1,36 +1,48 @@
 # -*- coding: utf-8 -*-
 import socket
+import struct
+import error
+import communication
 
 
-class IpSocket():
+class IpSocket(communication.Communication):
     def __init__(self):
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        communication.Communication.__init__(self)
 
-    def _get_device_address_by_name(self, hostname, port):
-        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    @staticmethod
+    def get_nearby_devices(port, hostname='', immediate_return=True):
+        # Receive multicast data
+        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        udp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        udp.bind(('', port))
+        mreq = struct.pack("4sl", socket.inet_aton('239.255.255.250'), socket.INADDR_ANY)
+        udp.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        # Use the Simple Service Discovery Protocol address for discovery
-        udp.bind(("239.255.255.250", port))
+        udp.settimeout(0.5)  # only give it a short period of time to find a package
 
-        while True:
-            data, ip_address = udp.recvfrom(1024)  # todo how much data
-            if data == hostname:
-                return ip_address
+        devices = {}
+        for _ in range(0, 10):  # retry to find the device 10 times
+            try:
+                data, address = udp.recvfrom(1024)  # this will block until the timeout happens
+                devices[address[0]] = data
+                if immediate_return and data.lower() == hostname.lower():
+                    return devices.items()
+
+            except socket.timeout:
+                pass  # got a time out, lets try again
+        return devices.items()
 
     def connect_by_hostname(self, hostname, port):
-        ip_address = self._get_device_address_by_name(hostname, port)
+        devices = self.get_nearby_devices(port, hostname)
+        for ip_address, name in devices:
+            if name.lower() == hostname.lower():
+                break
+        else:
+            raise error.BrickNotFoundException("No brick by name {0} found".format(hostname))
+
         self.connect(ip_address, port)
 
-    def connect(self, addr, port):
-        self._socket.connect((addr, port))
 
-    def send(self, data):
-        self._socket.send(data)
-
-    def receive(self, length, timeout=None):
-        self._socket.settimeout(timeout)
-        return self._socket.recv(length)
-
-    def close(self):
-        self._socket.close()
-
+if __name__ == "__main__":
+    b = IpSocket()
+    print b._get_device_address_by_name('EV3', 3016)

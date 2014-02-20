@@ -3,3 +3,7 @@
 
 class IllegalArgumentException(ValueError):
     pass
+
+
+class BrickNotFoundException(Exception):
+    pass

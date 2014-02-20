@@ -5,7 +5,8 @@ import time
 
 
 #TODO do something smart with the port
-brick = ev3.connect_to_brick(ip='10.0.1.1', port=9200)
+# brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
+brick = ev3.find_brick('ev3')
 a = Motor(brick, 'A')
 b = Motor(brick, 'B')
 # print "testing forward a"
