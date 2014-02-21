@@ -41,8 +41,3 @@ class IpSocket(communication.Communication):
             raise error.BrickNotFoundException("No brick by name {0} found".format(hostname))
 
         self.connect(ip_address, port)
-
-
-if __name__ == "__main__":
-    b = IpSocket()
-    print b._get_device_address_by_name('EV3', 3016)
