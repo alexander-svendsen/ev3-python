@@ -39,5 +39,4 @@ class IpSocket(communication.Communication):
                 break
         else:
             raise error.BrickNotFoundException("No brick by name {0} found".format(hostname))
-
         self.connect(ip_address, port)

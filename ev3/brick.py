@@ -17,7 +17,7 @@ class Brick:
     def send_command(self, cmd):
         try:
             self.socket.send(cmd + '\n')
-            return self.socket.receive(1024)
+            return self.socket.receive(1024)  # TODO: revice on a better number
         except:
             raise BrickNotConnectedException("Brick not connected")
 

@@ -21,7 +21,3 @@ class BlueSocket(communication.Communication):
             raise error.BrickNotFoundException("No brick by name {0} found".format(hostname))
         self.connect(bluetooth_address, port)
 
-
-if __name__ == "__main__":
-    b = BlueSocket()
-    # b.connect('00:16:53:3D:F5:FF', 9200)  # quicker if you know the address

@@ -12,9 +12,8 @@ class Communication():
     def send(self, data):
         self._socket.send(data)
 
-    def receive(self, length, timeout=None):
-        self._socket.settimeout(timeout)
-        self._socket.recv(length)
+    def receive(self, length):
+        return self._socket.recv(length)
 
     def close(self):
         self._socket.close()
