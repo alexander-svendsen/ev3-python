@@ -6,7 +6,7 @@ class BrickNotConnectedException(Exception):
     pass
 
 
-class Brick:
+class Brick(object):
     def __init__(self, socket):
         """
         @type socket: communication.Communication

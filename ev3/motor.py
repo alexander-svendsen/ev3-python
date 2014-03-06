@@ -11,13 +11,13 @@ class InvalidMotorPortException(Exception):
 
 
 #future_todo: fix in the future when more ports can be connected
-_motor_ports_named_tuple = collections.namedtuple('MotorPorts', "A B C D")
+_motor_ports_named_tuple = collections.namedtuple('MotorPorts', "PORT_A PORT_B PORT_C PORT_D")
 MOTOR_PORTS = _motor_ports_named_tuple("A", "B", "C", "D")  # The only valid motor ports
 
 # REVIEW should i communicate like this?
 
 
-class Motor():
+class Motor(object):
     """
     Provides the control mechanism for a single motor
     """
@@ -202,5 +202,7 @@ class Motor():
         Returns the current acceleration of the motor
         """
         return self._acceleration
+
+    #TODO: Close and __del__
 
 
