@@ -40,7 +40,7 @@ class Motor(object):
 
         self._motor_port = motor_port
         self._brick = brick
-        self._cmd = {"cla": "motor", "port": self._motor_port}
+        self._cmd = {"cla": "motor", "motor_port": self._motor_port}
         self._speed = 360
         self._acceleration = 6000
 
