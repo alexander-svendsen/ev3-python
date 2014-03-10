@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-
-
-
-import ev3,time
+import ev3
+import time
 
 brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
 #brick = ev3.find_brick_by_name('ev3', by_ip=False)

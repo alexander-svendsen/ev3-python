@@ -63,7 +63,6 @@ class Sensor(object):
         data = self._brick.send_command(json.dumps(packet))
         return json.loads(data)
 
-
     def get_available_modes(self):
         return [y.get_name() for y in self._available_modes]
 
@@ -98,8 +97,7 @@ class Sensor(object):
         return self._available_modes[self._selected_mode]
 
     def close(self):
-        #TODO, do something with it
-        pass
+        self._send_command("close")
 
     #incase of garbage collected, close the sensor
     def __del__(self):
