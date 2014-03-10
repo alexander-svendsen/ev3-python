@@ -18,6 +18,16 @@ SENSOR_PORTS = _sensor_ports_named_tuple(1, 2, 3, 4)  # The only valid sensor po
 
 
 class Mode(object):
+    def __init__(self, sensor):
+        """
+        @param sensor: sensor module this mode belongs to
+        @type sensor: Sensor
+        """
+        self.sensor = sensor
+
+    def fetch_sample(self):
+        return self.sensor.get_raw_data()
+
     @staticmethod
     def get_name():
         return ""
@@ -25,9 +35,6 @@ class Mode(object):
     @staticmethod
     def get_sample_size():
         return 0
-
-    def fetch_sample(self):
-        pass
 
     def __str__(self):
         return self.get_name()
@@ -49,7 +56,7 @@ class Sensor(object):
         self._send_command("open_sensor", sensor_class_name=self.__class__.__name__)
 
         # classes that inherit this variable should override it with the correct mode values
-        self._available_modes = [Mode()]
+        self._available_modes = [Mode(self)]
 
         # every sensor starts on mode 0
         self._selected_mode = 0
@@ -66,7 +73,7 @@ class Sensor(object):
     def get_available_modes(self):
         return [y.get_name() for y in self._available_modes]
 
-    def set_mode(self, mode): #TODO maybe the actual mode class as well
+    def _set_mode(self, mode):
         if type(mode) == int:
             if len(self._available_modes) < mode:
                 raise InvalidModeSelected("Mode list out of range")
@@ -80,7 +87,11 @@ class Sensor(object):
 
         if new_selected_mode != self._selected_mode:
             self._selected_mode = new_selected_mode
-            #TODO, do something with it
+            self._send_command("set_mode", mode=new_selected_mode)
+
+    def get_mode(self, mode):
+        self._set_mode(mode)
+        return self.get_selected_mode()
 
     def get_selected_mode_name(self):
         return self._available_modes[self._selected_mode].get_name()
@@ -88,10 +99,8 @@ class Sensor(object):
     def get_selected_mode_sample_size(self):
         return self._available_modes[self._selected_mode].get_sample_size()
 
-    def fetch_sample(self):
-        #TODO: implement it, think it can be implemented here just as well
-        self._available_modes[self._selected_mode].fetch_sample()
-        pass
+    def get_raw_data(self):
+        return self._send_command("fetch_sample")["sample"]
 
     def get_selected_mode(self):
         return self._available_modes[self._selected_mode]
