@@ -12,6 +12,9 @@ class InvalidModeSelected(Exception):
     pass
 
 
+class InvalidMethodException(Exception):
+    pass
+
 #future_todo: fix in the future when more ports can be connected
 _sensor_ports_named_tuple = collections.namedtuple('SensorPorts', "PORT_1 PORT_2 PORT_3 PORT_4")
 SENSOR_PORTS = _sensor_ports_named_tuple(1, 2, 3, 4)  # The only valid sensor ports
@@ -28,13 +31,12 @@ class Mode(object):
     def fetch_sample(self):
         return self.sensor.get_raw_data()
 
-    @staticmethod
-    def get_name():
-        return ""
+    def get_name(self):
+        return str(self.__class__.__name__[:-4])
 
     @staticmethod
     def get_sample_size():
-        return 0
+        return 1
 
     def __str__(self):
         return self.get_name()
@@ -69,6 +71,11 @@ class Sensor(object):
 
         data = self._brick.send_command(json.dumps(packet))
         return json.loads(data)
+
+    def _call_sensor_control_method(self, method_name):
+        result = bool(self._send_command("call_method", method=method_name))
+        if not result:
+            raise InvalidMethodException("Method: {} does not exists", method_name)
 
     def get_available_modes(self):
         return [y.get_name() for y in self._available_modes]
