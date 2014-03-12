@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import common
 from common import Sensor, Mode
 
 
@@ -9,23 +10,18 @@ class HiTechnicColorSensor(Sensor):
 
     def get_color_id_mode(self):
         """
-        Return the color id mode. A mode where colors are categorized for you.
-        @return: color id mode
         @rtype: ColorIDMode
         """
         return self.get_mode(0)
 
     def get_rgb_mode(self):
         """
-        Return the rgb mode. Where data is returned as a rgb value
-        @return: rgb mode
         @rtype: RGBMode
         """
         return self.get_mode(1)
 
     class ColorIDMode(Mode):
-        colorDict = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow', 4: 'magenta', 5: 'orange', 6: 'white', 7: 'black',
-                     8: 'pink', 9: 'gray', 10: 'light gray', 11: 'dark gray', 12: 'cyan'}
+        colorDict = common.COLOR_DICT
 
         def get_color_specter(self):
             return self.colorDict.values()

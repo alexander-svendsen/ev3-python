@@ -2,6 +2,7 @@
 import collections
 import json
 from ev3 import error, Brick
+from ev3.error import BrickNotFoundException
 
 
 class InvalidSensorPortException(Exception):
@@ -23,19 +24,33 @@ SENSOR_PORTS = _sensor_ports_named_tuple(1, 2, 3, 4)  # The only valid sensor po
 class Mode(object):
     def __init__(self, sensor):
         """
+        A abstract class meant to be used by inner classes in sensors to have som complete methods common for all modes
         @param sensor: sensor module this mode belongs to
         @type sensor: Sensor
         """
-        self.sensor = sensor
+        self._sensor = sensor
 
     def fetch_sample(self):
-        return self.sensor.get_raw_data()
+        """
+        Returns a list with raw data in float for this mode.
+        @rtype: list[float]
+        """
+        return self._sensor.get_raw_data()
 
     def get_name(self):
+        """
+        Returns the name of this mode.
+        Most cases it's the same as the class name but without the "Mode" part.
+        @return: mode name.
+        """
         return str(self.__class__.__name__[:-4])
 
     @staticmethod
     def get_sample_size():
+        """
+        Returns how big the list of data this mode returns in fetch_sample. Always the same amount.
+        @return: sample size.
+        """
         return 1
 
     def __str__(self):
@@ -44,6 +59,14 @@ class Mode(object):
 
 class Sensor(object):
     def __init__(self, brick, sensor_port):
+        """
+        Opens the specified sensor at the provided port. Note this class is not meant to be used by itself, but as a
+        parent class for other sensors.
+
+        @param brick: Which brick should this sensor be opened on
+        @param sensor_port: What sensor port is the sensor on
+        @raise error.IllegalArgumentException: Raised if the parameters are wrong, ie not a valid sensor port, or brick
+        """
         if sensor_port not in SENSOR_PORTS:
             raise InvalidSensorPortException("Must be a valid sensor port")
 
@@ -70,6 +93,8 @@ class Sensor(object):
         packet.update(extra_command)
 
         data = self._brick.send_command(json.dumps(packet))
+        if data in (None, ''):
+            raise BrickNotFoundException("Brick not connected anymore!")
         return json.loads(data)
 
     def _call_sensor_control_method(self, method_name):
@@ -78,6 +103,10 @@ class Sensor(object):
             raise InvalidMethodException("Method: {} does not exists", method_name)
 
     def get_available_modes(self):
+        """
+        A method for getting the names of the available modes for this sensor
+        @return: a list of the modes name in the current sensor
+        """
         return [y.get_name() for y in self._available_modes]
 
     def _set_mode(self, mode):
@@ -97,6 +126,11 @@ class Sensor(object):
             self._send_command("set_mode", mode=new_selected_mode)
 
     def get_mode(self, mode):
+        """
+        Sets and returns the mode for this sensor
+        @param mode: Which mode to get
+        @type mode: int, str
+        """
         self._set_mode(mode)
         return self.get_selected_mode()
 
@@ -113,11 +147,29 @@ class Sensor(object):
         return self._available_modes[self._selected_mode]
 
     def close(self):
-        self._send_command("close")
+        try:
+            self._send_command("close")
+        except BrickNotFoundException:
+            pass # at this point we don't care any more because we lost the brick and must restart anyway
 
     #incase of garbage collected, close the sensor
     def __del__(self):
         self.close()
 
-    def __str__(self):
-        str(self) # FIXME add Name of sensor and mode selected.
+#A dict over what the different values in the colorid modes mean
+COLOR_DICT = {
+    0: 'red',
+    1: 'green',
+    2: 'blue',
+    3: 'yellow',
+    4: 'magenta',
+    5: 'orange',
+    6: 'white',
+    7: 'black',
+    8: 'pink',
+    9: 'gray',          #unused!
+    10: 'light gray',   #unused!
+    11: 'dark gray',    #unused!
+    12: 'cyan',         #unused!
+    13: 'brown'
+}
