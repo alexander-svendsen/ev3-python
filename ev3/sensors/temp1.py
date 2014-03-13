@@ -133,7 +133,7 @@ class NXTSoundSensor(Sensor):
         """
         return self.get_mode("DBA")
 
-    #Strangly enough the real names is set unlogical. Since that don't make any sence we use the class name
+    #Strangly enough the real names is set unlogical. Since that don't make any since we use the class name
     class DBMode(Mode):
         """
         Mode that measures sound in decibel (DB)

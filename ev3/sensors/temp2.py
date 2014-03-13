@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import NXTSensors
+import temp1
 import common
 from common import Sensor, Mode
 
@@ -180,7 +180,7 @@ class EV3UltrasonicSensor(Sensor):
         pass
 
 
-class EV3TouchSensor(NXTSensors.NXTTouchSensor):
+class EV3TouchSensor(temp1.NXTTouchSensor):
     """
     Class for the Lego EV3 Touch sensor.
     """

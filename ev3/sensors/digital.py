@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 #EV3 sensors
-from EV3Sensors import EV3ColorSensor
-from EV3Sensors import EV3GyroSensor
-from EV3Sensors import EV3UltrasonicSensor
+from temp2 import EV3ColorSensor
+from temp2 import EV3GyroSensor
+from temp2 import EV3UltrasonicSensor
 
 #HiTechnic sensors
-from HiTechnicSensors import HiTechnicColorSensor
-from HiTechnicSensors import HiTechnicAccelerometer
-from HiTechnicSensors import HiTechnicCompass
+from teml3 import HiTechnicColorSensor
+from teml3 import HiTechnicAccelerometer
+from teml3 import HiTechnicCompass
 
 #NXT sensors
-from NXTSensors import NXTUltrasonicSensor
+from temp1 import NXTUltrasonicSensor
 
 
 
