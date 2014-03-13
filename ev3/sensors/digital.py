@@ -8,6 +8,7 @@ from EV3Sensors import EV3UltrasonicSensor
 #HiTechnic sensors
 from HiTechnicSensors import HiTechnicColorSensor
 from HiTechnicSensors import HiTechnicAccelerometer
+from HiTechnicSensors import HiTechnicCompass
 
 #NXT sensors
 from NXTSensors import NXTUltrasonicSensor
