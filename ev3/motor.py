@@ -40,6 +40,10 @@ class Motor(object):
 
         self._motor_port = motor_port
         self._brick = brick
+
+        if not self._brick.set_port_to_used(self._motor_port):
+            raise InvalidMotorPortException("motor port already in use")
+
         self._cmd = {"cla": "motor", "motor_port": self._motor_port}
         self._speed = 360
         self._acceleration = 6000
@@ -203,6 +207,14 @@ class Motor(object):
         """
         return self._acceleration
 
-    #TODO: Close and __del__
+    def close(self):
+        """
+        Closes the motor port, freeing it for other motor objects
+        """
+        self._brick.set_port_to_unused(self._motor_port)
+
+    #incase of garbage collected, close the motor port
+    def __del__(self):
+        self.close()
 
 

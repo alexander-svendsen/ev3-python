@@ -76,10 +76,15 @@ class Sensor(object):
         self._sensor_port = sensor_port
         self._brick = brick
 
+        if not self._brick.set_port_to_used(self._sensor_port):
+            raise InvalidSensorPortException("sensor port already in use")
+
         self._cmd = {"cla": "sensor",
                      "sensor_port": (self._sensor_port - 1)}
-        self._send_command("open_sensor", sensor_class_name=self.__class__.__name__)
+        response = self._send_command("open_sensor", sensor_class_name=self.__class__.__name__)
 
+        if not response["data"]:
+            raise InvalidSensorPortException("Can't open sensor")
         # classes that inherit this variable should override it with the correct mode values
         self._available_modes = [Mode(self)]
 
@@ -149,8 +154,9 @@ class Sensor(object):
     def close(self):
         try:
             self._send_command("close")
-        except BrickNotFoundException:
-            pass # at this point we don't care any more because we lost the brick and must restart anyway
+        except:
+            pass  # at this point we don't care any more because we lost the brick and must restart anyway
+        self._brick.set_port_to_unused(self._sensor_port)
 
     #incase of garbage collected, close the sensor
     def __del__(self):
