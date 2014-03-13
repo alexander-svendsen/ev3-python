@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 #EV3 sensors
-from temp2 import EV3TouchSensor
+from ev3sensors import EV3TouchSensor
 
 #NXT sensors
-from temp1 import NXTTouchSensor
-from temp1 import NXTSoundSensor
-from temp1 import NXTLightSensor
+from nxtsensors import NXTTouchSensor
+from nxtsensors import NXTSoundSensor
+from nxtsensors import NXTLightSensor
 
 
 #HiTechnic sensors
-from teml3 import HiTechnicGyro
+from hitechnicsensors import HiTechnicGyro
 
