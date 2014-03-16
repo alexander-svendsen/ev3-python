@@ -1,20 +1,9 @@
 # -*- coding: utf-8 -*-
 import collections
-import json
+
 from ev3 import error, Brick
-from ev3.error import BrickNotFoundException
+from ev3.error import InvalidSensorPortException, InvalidModeSelected, InvalidMethodException
 
-
-class InvalidSensorPortException(Exception):
-    pass
-
-
-class InvalidModeSelected(Exception):
-    pass
-
-
-class InvalidMethodException(Exception):
-    pass
 
 #future_todo: fix in the future when more ports can be connected
 _sensor_ports_named_tuple = collections.namedtuple('SensorPorts', "PORT_1 PORT_2 PORT_3 PORT_4")
@@ -75,8 +64,9 @@ class Sensor(object):
 
         self._sensor_port = sensor_port
         self._brick = brick
+        self._closed = False
 
-        if not self._brick.set_port_to_used(self._sensor_port):
+        if not self._brick.set_port_to_used(self._sensor_port, self):
             raise InvalidSensorPortException("sensor port already in use")
 
         self._cmd = {"cla": "sensor",
@@ -92,15 +82,17 @@ class Sensor(object):
         self._selected_mode = 0
 
     def _send_command(self, cmd, **extra_command):
-        self._cmd["cmd"] = cmd
+        if self._closed:
+            raise error.SensorNotConnectedException("The sensor was closed, you cannot use this object anymore")
 
+        self._cmd["cmd"] = cmd
         packet = self._cmd.copy()
         packet.update(extra_command)
 
-        data = self._brick.send_command(json.dumps(packet))
+        data = self._brick.send_command(packet)
         if data in (None, ''):
-            raise BrickNotFoundException("Brick not connected anymore!")
-        return json.loads(data)
+            raise error.BrickNotConnectedException("Brick not connected anymore!")
+        return data
 
     def _call_sensor_control_method(self, method_name):
         result = bool(self._send_command("call_method", method=method_name))
@@ -151,12 +143,16 @@ class Sensor(object):
     def get_selected_mode(self):
         return self._available_modes[self._selected_mode]
 
+    def get_name(self):
+        return self.__class__.__name__
+
     def close(self):
         try:
             self._send_command("close")
         except:
             pass  # at this point we don't care any more because we lost the brick and must restart anyway
         self._brick.set_port_to_unused(self._sensor_port)
+        self._closed = True
 
     #incase of garbage collected, close the sensor
     def __del__(self):

@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
 import collections
-import error
 import json
 
+import error
 from brick import Brick
-
-
-class InvalidMotorPortException(Exception):
-    pass
-
 
 #future_todo: fix in the future when more ports can be connected
 _motor_ports_named_tuple = collections.namedtuple('MotorPorts', "PORT_A PORT_B PORT_C PORT_D")
 MOTOR_PORTS = _motor_ports_named_tuple("A", "B", "C", "D")  # The only valid motor ports
-
-# REVIEW should i communicate like this?
 
 
 class Motor(object):
@@ -33,7 +26,7 @@ class Motor(object):
         """
 
         if motor_port not in MOTOR_PORTS:
-            raise InvalidMotorPortException("Must be a valid motor port")
+            raise error.InvalidMotorPortException("Must be a valid motor port")
 
         if not isinstance(brick, Brick):
             raise error.IllegalArgumentException("Invalid brick instance")
@@ -41,14 +34,19 @@ class Motor(object):
         self._motor_port = motor_port
         self._brick = brick
 
-        if not self._brick.set_port_to_used(self._motor_port):
-            raise InvalidMotorPortException("motor port already in use")
+        if not self._brick.set_port_to_used(self._motor_port, self):
+            raise error.InvalidMotorPortException("motor port already in use")
 
         self._cmd = {"cla": "motor", "motor_port": self._motor_port}
         self._speed = 360
         self._acceleration = 6000
 
+        self._closed = False
+
     def _send_command(self, cmd, immediate_return, **extra_command):
+        if self._closed:
+            raise error.MotorNotConnectedException("Motor got closed, you cannot use this object anymore")
+
         self._cmd["cmd"] = cmd
 
         packet = self._cmd.copy()
@@ -58,8 +56,10 @@ class Motor(object):
             self._brick.send_command(json.dumps(packet))
         else:
             packet["immediate"] = immediate_return
-            data = self._brick.send_command(json.dumps(packet))
-            return json.loads(data)
+            data = self._brick.send_command(packet)
+            if data in (None, ''):
+                raise error.BrickNotConnectedException("Brick not connected anymore!")
+            return data
 
     def _get_data(self, cmd):
         self._cmd["cmd"] = cmd
@@ -212,6 +212,10 @@ class Motor(object):
         Closes the motor port, freeing it for other motor objects
         """
         self._brick.set_port_to_unused(self._motor_port)
+        self._closed = True
+
+    def get_name(self):
+        return "Motor_" + self._motor_port
 
     #incase of garbage collected, close the motor port
     def __del__(self):

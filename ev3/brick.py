@@ -1,36 +1,42 @@
 # -*- coding: utf-8 -*-
+import json
 import error
 
 
-class BrickNotConnectedException(Exception):
-    pass
-
-
 class Brick(object):
-    def __init__(self, socket):
+    def __init__(self, communication_object):
         """
-        @param socket: Socket used for communicating with the brick
-        @type socket: communication.Communication
+        @param communication_object: Socket used for communicating with the brick
+        @type communication_object: communication.Communication
         """
-        self.socket = socket
-        self._opened_ports = []
+        self._communication = communication_object
+        self._opened_ports = {}
 
-    def set_port_to_used(self, port):
+        # Can't use file_sockets since bluetooth don't support it, so implement a easy fix for it by using buffers
+        self._buffer = ""
+
+    @property
+    def get_opened_ports(self):
+        return self._opened_ports
+
+    def set_port_to_used(self, port, obj_using_port=None):
         if port in self._opened_ports:
             return False
-        self._opened_ports.append(port)
+        self._opened_ports[port] = obj_using_port
         return True
 
     def set_port_to_unused(self, port):
         if port in self._opened_ports:
-            self._opened_ports.remove(port)
+            del self._opened_ports[port]
 
     def send_command(self, cmd):
         try:
-            self.socket.send(cmd + '\n')
-            return self.socket.receive(1024)  # TODO: revice on a better number
+            self._communication.send(json.dumps(cmd) + '\n')
+            return json.loads(self._communication.receive(1024))  # TODO: revice on a better number
         except:
-            raise BrickNotConnectedException("Brick not connected")
+            raise error.BrickNotConnectedException("Brick not connected")
 
-    def close(self):  # Note should be recommended to the user
-        pass
+    def close(self):
+        open_ports = self._opened_ports.keys()
+        for port in open_ports:
+            self._opened_ports[port].close()
