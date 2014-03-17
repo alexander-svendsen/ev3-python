@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import json
 import error
+import asyncmanger
 
 
 class Brick(object):
@@ -10,10 +10,8 @@ class Brick(object):
         @type communication_object: communication.Communication
         """
         self._communication = communication_object
+        self.asynch_msg = asyncmanger.AsynchManager(communication_object)
         self._opened_ports = {}
-
-        # Can't use file_sockets since bluetooth don't support it, so implement a easy fix for it by using buffers
-        self._buffer = ""
 
     @property
     def get_opened_ports(self):
@@ -31,8 +29,9 @@ class Brick(object):
 
     def send_command(self, cmd):
         try:
-            self._communication.send(json.dumps(cmd) + '\n')
-            return json.loads(self._communication.receive(1024))  # TODO: revice on a better number
+            return self.asynch_msg.send_and_receive(cmd)
+            # self._communication.send(json.dumps(cmd) + '\n')
+            # return json.loads(self._communication.receive(1024))
         except:
             raise error.BrickNotConnectedException("Brick not connected")
 
