@@ -6,8 +6,11 @@ brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
 ev3_touch = ev3.EV3TouchSensor(brick, 1)
 nxt_touch = ev3.NXTTouchSensor(brick, 4)
 
-while(True):
-    print ev3_touch.get_raw_data()
+while True:
+    start = time.time()
+    ev3_touch.get_raw_data()
+    end = time.time() - start
+    print "took: ", end
 brick.close()
 
 print ev3_touch

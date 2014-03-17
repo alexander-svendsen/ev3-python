@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import error
-import asyncmanger
+import asynchronous
 
 
 class Brick(object):
@@ -10,7 +10,7 @@ class Brick(object):
         @type communication_object: communication.Communication
         """
         self._communication = communication_object
-        self.asynch_msg = asyncmanger.AsynchronousMessageHandler(communication_object)
+        self._message_handler = asynchronous.MessageHandler(communication_object)
         self._opened_ports = {}
 
     @property
@@ -28,16 +28,13 @@ class Brick(object):
             del self._opened_ports[port]
 
     def send_command(self, cmd):
-        # try:
-        seq = self.asynch_msg.send(cmd)
-        data =  self.asynch_msg.receive(seq)
-        if self.asynch_msg.exception:
+        seq = self._message_handler.send(cmd)
+        data = self._message_handler.receive(seq)
+
+        # if anything has gone wrong in the async handler, the exception flag is set to true.
+        if self._message_handler.exception:
             raise error.BrickNotConnectedException("Brick not connected")
         return data
-            # self._communication.send(json.dumps(cmd) + '\n')
-            # return json.loads(self._communication.receive(1024))
-        # except:
-        #     raise error.BrickNotConnectedException("Brick not connected")
 
     def close(self):
         open_ports = self._opened_ports.keys()
