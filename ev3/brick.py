@@ -10,7 +10,7 @@ class Brick(object):
         @type communication_object: communication.Communication
         """
         self._communication = communication_object
-        self.asynch_msg = asyncmanger.AsynchManager(communication_object)
+        self.asynch_msg = asyncmanger.AsynchronousMessageHandler(communication_object)
         self._opened_ports = {}
 
     @property
@@ -28,12 +28,16 @@ class Brick(object):
             del self._opened_ports[port]
 
     def send_command(self, cmd):
-        try:
-            return self.asynch_msg.send_and_receive(cmd)
+        # try:
+        seq = self.asynch_msg.send(cmd)
+        data =  self.asynch_msg.receive(seq)
+        if self.asynch_msg.exception:
+            raise error.BrickNotConnectedException("Brick not connected")
+        return data
             # self._communication.send(json.dumps(cmd) + '\n')
             # return json.loads(self._communication.receive(1024))
-        except:
-            raise error.BrickNotConnectedException("Brick not connected")
+        # except:
+        #     raise error.BrickNotConnectedException("Brick not connected")
 
     def close(self):
         open_ports = self._opened_ports.keys()
