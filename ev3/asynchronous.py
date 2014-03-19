@@ -95,10 +95,3 @@ class MessageHandler(object):
         message = self._message_queue[seq].msg
         del self._message_queue[seq]
         return message
-
-
-
-
-
-
-

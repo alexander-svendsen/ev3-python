@@ -220,5 +220,3 @@ class Motor(object):
     #incase of garbage collected, close the motor port
     def __del__(self):
         self.close()
-
-

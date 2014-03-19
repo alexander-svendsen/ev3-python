@@ -11,4 +11,3 @@ from nxtsensors import NXTLightSensor
 
 #HiTechnic sensors
 from hitechnicsensors import HiTechnicGyro
-

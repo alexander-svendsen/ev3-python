@@ -6,8 +6,8 @@ class Communication(object):
     def __init__(self):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self, addr, port):
-        self._socket.connect((addr, port))
+    def connect(self, address, port):
+        self._socket.connect((address, port))
 
     def send(self, data):
         self._socket.send(data)

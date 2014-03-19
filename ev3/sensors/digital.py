@@ -12,6 +12,3 @@ from hitechnicsensors import HiTechnicCompass
 
 #NXT sensors
 from nxtsensors import NXTUltrasonicSensor
-
-
-

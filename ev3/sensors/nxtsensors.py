@@ -145,5 +145,3 @@ class NXTSoundSensor(Sensor):
         Mode that measures sound pressure level (DBA)
         """
         pass
-
-

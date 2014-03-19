@@ -166,4 +166,3 @@ class HiTechnicIRSeeker(Sensor):
 
     class UnmodulatedMode(Mode):
         pass
-

@@ -3,8 +3,9 @@ import error
 import asynchronous
 
 
-class Battery(object):  # if rechargable battery used
+class Battery(object):
     def __init__(self):
+        # if rechargeable battery used, different values if otherwise
         self.level_min = 7100
         self.level_max = 8200
         self.milli_voltage = 0
@@ -35,7 +36,7 @@ class Battery(object):  # if rechargable battery used
 class Brick(object):
     def __init__(self, communication_object):
         """
-        @param communication_object: Socket used for communicating with the brick
+        @param communication_object: Communication object used for communicating with the brick
         @type communication_object: communication.Communication
         """
         self._message_handler = asynchronous.MessageHandler(communication_object)

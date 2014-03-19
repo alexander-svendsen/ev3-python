@@ -11,5 +11,3 @@ def get_sensor_type_at(brick, sensor_port):
     cmd = {"cla": "sensor", "cmd": "get_sensor_type", "sensor_port": sensor_port - 1}
     data = brick.send_command(cmd)
     return data["sample_string"]
-
-

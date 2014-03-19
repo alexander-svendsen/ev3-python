@@ -35,5 +35,3 @@ class MotorNotConnectedException(Exception):
 
 class InvalidMotorPortException(Exception):
     pass
-
-
