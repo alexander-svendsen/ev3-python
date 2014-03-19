@@ -47,6 +47,17 @@ class Mode(object):
 
 
 class Sensor(object):
+    #todo should i do the same for motor?
+    initialized = False
+
+    def __new__(cls, brick, sensor_port):
+        print brick.get_opened_ports
+        if sensor_port in brick.get_opened_ports:
+            sensor = brick.get_opened_ports[sensor_port]
+            if sensor.__class__ == cls:
+                return sensor
+        return super(Sensor, cls).__new__(cls, brick, sensor_port)
+
     def __init__(self, brick, sensor_port):
         """
         Opens the specified sensor at the provided port. Note this class is not meant to be used by itself, but as a
@@ -54,8 +65,10 @@ class Sensor(object):
 
         @param brick: Which brick should this sensor be opened on
         @param sensor_port: What sensor port is the sensor on
-        @raise error.IllegalArgumentException: Raised if the parameters are wrong, ie not a valid sensor port, or brick
         """
+        if self.initialized:  # catches double init
+            return
+
         if sensor_port not in SENSOR_PORTS:
             raise InvalidSensorPortException("Must be a valid sensor port")
 
@@ -67,7 +80,7 @@ class Sensor(object):
         self._closed = False
 
         if not self._brick.set_port_to_used(self._sensor_port, self):
-            raise InvalidSensorPortException("sensor port already in use")
+            raise InvalidSensorPortException("sensor port already in use by a different sensor")
 
         self._cmd = {"cla": "sensor",
                      "sensor_port": (self._sensor_port - 1)}
@@ -80,6 +93,7 @@ class Sensor(object):
 
         # every sensor starts on mode 0
         self._selected_mode = 0
+        self.initialized = True
 
     def _send_command(self, cmd, **extra_command):
         if self._closed:
