@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .common import *
+from .common import SENSOR_PORTS, Mode, Sensor
 from .analog import *
 from .digital import *
 

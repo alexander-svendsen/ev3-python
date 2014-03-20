@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 import collections
 
-from ev3 import error, Brick
+# from brick import Brick
+from ev3.brick import Brick
 from ev3.error import InvalidSensorPortException, InvalidModeSelected, InvalidMethodException
 
 
 #future_todo: fix in the future when more ports can be connected
 _sensor_ports_named_tuple = collections.namedtuple('SensorPorts', "PORT_1 PORT_2 PORT_3 PORT_4")
 SENSOR_PORTS = _sensor_ports_named_tuple(1, 2, 3, 4)  # The only valid sensor ports
+
+
+def cache(function):
+    def new_function(self, *args, **kwargs):
+        if self.cache_data:
+            return self.cache_data
+        return function(self, *args, **kwargs)
+    return new_function
 
 
 class Mode(object):
@@ -47,11 +56,9 @@ class Mode(object):
 
 
 class Sensor(object):
-    #todo should i do the same for motor?
     initialized = False
 
-    def __new__(cls, brick, sensor_port):
-        print brick.get_opened_ports
+    def __new__(cls, brick, sensor_port):  # review: write about this in the report
         if sensor_port in brick.get_opened_ports:
             sensor = brick.get_opened_ports[sensor_port]
             if sensor.__class__ == cls:
@@ -66,14 +73,14 @@ class Sensor(object):
         @param brick: Which brick should this sensor be opened on
         @param sensor_port: What sensor port is the sensor on
         """
-        if self.initialized:  # catches double init
-            return
-
         if sensor_port not in SENSOR_PORTS:
             raise InvalidSensorPortException("Must be a valid sensor port")
 
         if not isinstance(brick, Brick):
             raise error.IllegalArgumentException("Invalid brick instance")
+
+        if self.initialized:  # catches double init
+            return
 
         self._sensor_port = sensor_port
         self._brick = brick
@@ -94,6 +101,7 @@ class Sensor(object):
         # every sensor starts on mode 0
         self._selected_mode = 0
         self.initialized = True
+        self.cache_data = None
 
     def _send_command(self, cmd, **extra_command):
         if self._closed:
@@ -140,7 +148,7 @@ class Sensor(object):
         """
         Sets and returns the mode for this sensor
         @param mode: Which mode to get
-        @type mode: int, str
+        @type mode: int|str
         """
         self._set_mode(mode)
         return self.get_selected_mode()
@@ -151,6 +159,10 @@ class Sensor(object):
     def get_selected_mode_sample_size(self):
         return self._available_modes[self._selected_mode].get_sample_size()
 
+    def set_cache_data(self, data):
+        self.cache_data = data
+
+    @cache
     def get_raw_data(self):
         return self._send_command("fetch_sample")["sample"]
 

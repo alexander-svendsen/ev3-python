@@ -39,16 +39,19 @@ class Brick(object):
         @param communication_object: Communication object used for communicating with the brick
         @type communication_object: communication.Communication
         """
-        self._message_handler = asynchronous.MessageHandler(communication_object)
+        self._message_handler = asynchronous.MessageHandler(communication_object, self.event_callback)
         self._opened_ports = {}
         self.battery = Battery()
+        self.hostname = ""
         self.refresh_battery()
 
     def get_battery(self):
         return self.battery
 
     def refresh_battery(self):
-        self.battery.milli_voltage = self.send_command({"cla": "status", "cmd": "battery"})["data"]
+        response = self.send_command({"cla": "status"})
+        self.battery.milli_voltage = response["data"]
+        self.hostname = response["sample_string"]
 
     @property
     def get_opened_ports(self):
@@ -73,7 +76,17 @@ class Brick(object):
             raise error.BrickNotConnectedException("Brick not connected")
         return data
 
+    @staticmethod
+    def event_callback(data):  # meant to be overwritten
+        print "Event happened with data:", data
+
     def close(self):
         open_ports = self._opened_ports.keys()
         for port in open_ports:
             self._opened_ports[port].close()
+
+    def __del__(self):
+        self.close()
+
+    def __str__(self):
+        return self.hostname

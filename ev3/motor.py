@@ -14,12 +14,20 @@ class Motor(object):
     """
     Provides the control mechanism for a single motor
     """
+    initialized = False
+
+    def __new__(cls, brick, motor_port):
+        if motor_port in brick.get_opened_ports:
+            motor = brick.get_opened_ports[motor_port]
+            if motor.__class__ == cls:
+                return motor
+        return super(Motor, cls).__new__(cls, brick, motor_port)
+
     def __init__(self, brick, motor_port):
         """
         @param brick: The brick the motor uses
         @param motor_port: Which motor port to use.
         @see MOTOR_PORTS: Contains the valid motor ports to use, default A-D
-        @raise error.IllegalArgumentError: If any parameter is wrong this exception is raised
 
         @type brick: Brick
         @type motor_port: str
@@ -31,12 +39,13 @@ class Motor(object):
         if not isinstance(brick, Brick):
             raise error.IllegalArgumentException("Invalid brick instance")
 
+        if self.initialized:  # catches double init
+            return
+
         self._motor_port = motor_port
         self._brick = brick
 
-        if not self._brick.set_port_to_used(self._motor_port, self):
-            raise error.InvalidMotorPortException("motor port already in use")
-
+        self._brick.set_port_to_used(self._motor_port, self)
         self._cmd = {"cla": "motor", "motor_port": self._motor_port}
         self._speed = 360
         self._acceleration = 6000
