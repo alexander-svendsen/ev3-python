@@ -1,37 +1,31 @@
 # -*- coding: utf-8 -*-
 import collections
-from brick import Brick
-import sensors
 
 
 class Subscription(object):
-    def __init__(self, bricks):
+    def __init__(self, callbacks=None, subscribe_on_sensor_changes=True, subscribe_on_stream_data=True):
         self._events = {
             'sensor_connected': self._sensor_added,
             'sensor_disconnected': self._sensor_left,
-            'data_stream': self._data_stream_recived
+            'data_stream': self._data_stream_received
         }
         self.callbacks = collections.defaultdict(list)
-        self.subscription_channels = []
-        self._bricks = bricks
+        self._subscribe_on_sensor_changes = subscribe_on_sensor_changes
+        self._subscribe_on_stream_data = subscribe_on_stream_data
+        self._message_handler = None  # Should be changed to a appropriate message handler
 
-        for brick in bricks:
-            brick.event_callback = self.run_event
-            brick.event_callback("MUHAHAH")
+    def _send_subscribe(self, command):  # complete!
+        cmd = {"cla": "subscribe", "cmd": command}
+        self._message_handler.send(data=cmd, immediate_return=True)
 
-    def add_brick(self, brick):
-        pass
+    def send_subscribe_commands_to(self, message_handler):  # complete!
+        self._message_handler = message_handler
+        self._message_handler.set_callback(self.run_event)
 
-    def remove_brick(self, brick):
-        pass
-
-
-    #TODO: will store and tell the brick to start sending events on the appropriate streams
-    # if there is a subscription
-    def send_subscribe_commands_to(self, message_handler):
-        cmd = {}  # TODO
-        self.subscription_channels.append(message_handler)
-        message_handler.send(data=cmd, immediate_return=True)  # subscribe on events
+        if self._subscribe_on_sensor_changes:
+            self._send_subscribe("subscribe_on_sensor_changes")
+        if self._subscribe_on_stream_data:
+            self._send_subscribe("subscribe_on_stream_data")
 
     def _sensor_added(self, msg):
         sensor = msg["sample_string"]
@@ -44,8 +38,11 @@ class Subscription(object):
         for callback in self.callbacks["data_stream"]:
             callback(port=port)
 
-    def _data_stream_recived(self, msg):
+    def _data_stream_received(self, msg):
         pass  # TODO: Wait on this one
+
+    def is_event_active(self, event):
+        return event in self.callbacks
 
     def subscribe_on_data_stream_from_port(self, port, callback):
         pass # TODO: wait to do this one
@@ -60,8 +57,12 @@ class Subscription(object):
         self.callbacks["sensor_disconnected"].append(callback)
 
     def run_event(self, data):  #TODO: DATA?
-        print "..... woooot?"
+        print data
+        print data["msg"]
         # if event in self._events:
         #     self._events[event](msg)
         # else:
         #     print "Strange event received: ", event
+
+    def close(self): # TODO close the active subscriptions
+        pass

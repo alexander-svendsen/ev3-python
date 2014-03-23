@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import error
 import asynchronous
+import sensors
 
 
 class Battery(object):
@@ -39,11 +40,12 @@ class Brick(object):
         @param communication_object: Communication object used for communicating with the brick
         @type communication_object: communication.Communication
         """
-        self._message_handler = asynchronous.MessageHandler(communication_object, self.event_callback)
+        self._message_handler = asynchronous.MessageHandler(communication_object)
         self._opened_ports = {}
         self.battery = Battery()
         self.hostname = ""
         self.refresh_battery()
+        self.sub = None
 
     def get_battery(self):
         return self.battery
@@ -76,9 +78,27 @@ class Brick(object):
             raise error.BrickNotConnectedException("Brick not connected")
         return data
 
-    @staticmethod
-    def event_callback(data):  # meant to be overwritten
-        print "Event happened with data:", data
+    def set_subscription(self, sub):
+        self.sub = sub
+        self.sub.send_subscribe_commands_to(self._message_handler)
+        self.sub.subscribe_on_sensor_added(self._automatically_open_sensor_callback)
+
+    def remove_subscription(self):
+        self.sub.close()
+
+    def _automatically_open_sensor_callback(self, sensor_name, sensor_port):
+        print "opened sensor"
+        try:
+            klass = getattr(sensors, sensor_name)
+            klass(self, sensor_port)
+        except AttributeError:
+            print "Provided sensor does not exists: ", sensor_name
+
+    def _automatically_close_sensor_callback(self, sensor_port):
+        if sensor_port in self._opened_ports:
+            self._opened_ports[sensor_port].close()
+        else:
+            print "Something strange has happened. Trying to close a sensor, not there anymore"
 
     def close(self):
         open_ports = self._opened_ports.keys()

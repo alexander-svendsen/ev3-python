@@ -27,7 +27,7 @@ class Message(object):
 
 
 class MessageHandler(object):
-    def __init__(self, communication_obj, callback):
+    def __init__(self, communication_obj):
         """
         @param callback: function that will be called with data when receiving an event
         @param communication_obj: Socket used for communicating with the brick
@@ -35,7 +35,7 @@ class MessageHandler(object):
         @type callback: callable
         @type communication_obj: communication.Communication
         """
-        self.callback = callback
+        self._callback = lambda x: None
         self._communication_method = communication_obj
         # Can't use file_sockets since bluetooth don't support it, so implement a easy fix for it by using buffers
         self._buffer = ""
@@ -48,6 +48,9 @@ class MessageHandler(object):
         self._thread.daemon = True
         self._thread.start()
         self._send_lock = threading.Lock()
+
+    def set_callback(self, callback):
+        self._callback = callback
 
     def _receive(self):
         raw_data = self._communication_method.receive(1024)
@@ -67,7 +70,7 @@ class MessageHandler(object):
                         self._message_queue[data["seq"]] = Message()
                         self._message_queue[data["seq"]].msg = data
             else:
-                self.callback(data)  # send the event backwards
+                self._callback(data)  # send the event backwards
 
     def _receive_forever(self):
         while True:

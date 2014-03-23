@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import collections
-
-# from brick import Brick
-from ev3.brick import Brick
-from ev3.error import InvalidSensorPortException, InvalidModeSelected, InvalidMethodException
+from ev3.error import *
 
 
 #future_todo: fix in the future when more ports can be connected
@@ -72,12 +69,12 @@ class Sensor(object):
 
         @param brick: Which brick should this sensor be opened on
         @param sensor_port: What sensor port is the sensor on
+
+        @type brick: Brick
+        @type sensor_port: int
         """
         if sensor_port not in SENSOR_PORTS:
             raise InvalidSensorPortException("Must be a valid sensor port")
-
-        if not isinstance(brick, Brick):
-            raise error.IllegalArgumentException("Invalid brick instance")
 
         if self.initialized:  # catches double init
             return
@@ -105,7 +102,7 @@ class Sensor(object):
 
     def _send_command(self, cmd, **extra_command):
         if self._closed:
-            raise error.SensorNotConnectedException("The sensor was closed, you cannot use this object anymore")
+            raise SensorNotConnectedException("The sensor was closed, you cannot use this object anymore")
 
         self._cmd["cmd"] = cmd
         packet = self._cmd.copy()
@@ -113,7 +110,7 @@ class Sensor(object):
 
         data = self._brick.send_command(packet)
         if data in (None, ''):
-            raise error.BrickNotConnectedException("Brick not connected anymore!")
+            raise BrickNotConnectedException("Brick not connected anymore!")
         return data
 
     def _call_sensor_control_method(self, method_name):
