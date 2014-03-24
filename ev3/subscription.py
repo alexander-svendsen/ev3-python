@@ -4,11 +4,6 @@ import collections
 
 class Subscription(object):
     def __init__(self, callbacks=None, subscribe_on_sensor_changes=True, subscribe_on_stream_data=True):
-        self._events = {
-            'sensor_connected': self._sensor_added,
-            'sensor_disconnected': self._sensor_left,
-            'data_stream': self._data_stream_received
-        }
         self.callbacks = collections.defaultdict(list)
         self._subscribe_on_sensor_changes = subscribe_on_sensor_changes
         self._subscribe_on_stream_data = subscribe_on_stream_data
@@ -27,22 +22,19 @@ class Subscription(object):
         if self._subscribe_on_stream_data:
             self._send_subscribe("subscribe_on_stream_data")
 
-    def _sensor_added(self, msg):
+    def _new_sensor(self, msg):
+        port = int(msg["data"]) + 1
         sensor = msg["sample_string"]
-        port = msg["data"]
-        for callback in self.callbacks["sensor_added"]:
-            callback(sensor=sensor, port=port)
+        for callback in self.callbacks["new_sensor"]:
+            callback(sensor_name=sensor, port=port)
 
-    def _sensor_left(self, msg):
-        port = msg["data"]
-        for callback in self.callbacks["data_stream"]:
+    def _no_sensor(self, msg):
+        port = int(msg["data"]) + 1
+        for callback in self.callbacks["no_sensor"]:
             callback(port=port)
 
-    def _data_stream_received(self, msg):
+    def _samples_received(self, msg):
         pass  # TODO: Wait on this one
-
-    def is_event_active(self, event):
-        return event in self.callbacks
 
     def subscribe_on_data_stream_from_port(self, port, callback):
         pass # TODO: wait to do this one
@@ -51,18 +43,26 @@ class Subscription(object):
         self.callbacks["data_stream"].append(callback)
 
     def subscribe_on_sensor_added(self, callback):
-        self.callbacks["sensor_connected"].append(callback)
+        self.callbacks["new_sensor"].append(callback)
 
     def subscribe_on_sensor_removed(self, callback):
-        self.callbacks["sensor_disconnected"].append(callback)
+        self.callbacks["no_sensor"].append(callback)
 
     def run_event(self, data):  #TODO: DATA?
-        print data
-        print data["msg"]
-        # if event in self._events:
-        #     self._events[event](msg)
-        # else:
-        #     print "Strange event received: ", event
+        try:
+            print data
+            if data["msg"] == "sensor_info":
+                if data["sample_string"] != "None":
+                    return self._new_sensor(data)
+                else:
+                    return self._no_sensor(data)
+            elif data["msg"] == "samples":
+                return self._samples_received(data)
+
+            print "Strange event received: ", data["msg"]
+        except Exception as e:
+            print "Strange exception", e
+        print "it got finished"
 
     def close(self): # TODO close the active subscriptions
         pass

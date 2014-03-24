@@ -6,12 +6,11 @@ class NXTTouchSensor(Sensor):
     """
     Class for the Lego NXT Touch Sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has one mode, touch mode.
         """
-        super(NXTTouchSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.TouchMode(self)]
+        return [self.TouchMode(self)]
 
     def get_touch_mode(self):
         """
@@ -31,12 +30,11 @@ class NXTUltrasonicSensor(Sensor):
     """
     Class for the Lego NXT Ultrasonic Sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has two modes, Continuous and Ping mode .
         """
-        super(NXTUltrasonicSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.ContinuousMode(self), self.PingMode(self)]
+        return [self.ContinuousMode(self), self.PingMode(self)]
 
     def get_continuous_mode(self):
         """
@@ -77,12 +75,11 @@ class NXTLightSensor(Sensor):
     """
     Class for the Lego Light Sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has two modes, Red and Ambient mode.
         """
-        super(NXTLightSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.RedMode(self), self.AmbientMode(self)]
+        return [self.RedMode(self), self.AmbientMode(self)]
 
     def get_red_mode(self):
         """
@@ -114,12 +111,11 @@ class NXTSoundSensor(Sensor):
     """
     Class for the Lego Sound Sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has two modes, DB and DBA mode.
         """
-        super(NXTSoundSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.DBMode(self), self.DBAMode(self)]
+        return [self.DBMode(self), self.DBAMode(self)]
 
     def get_db_mode(self):
         """

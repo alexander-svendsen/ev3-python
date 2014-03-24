@@ -86,17 +86,17 @@ class Brick(object):
     def remove_subscription(self):
         self.sub.close()
 
-    def _automatically_open_sensor_callback(self, sensor_name, sensor_port):
-        print "opened sensor"
+    def _automatically_open_sensor_callback(self, sensor_name, port):
         try:
             klass = getattr(sensors, sensor_name)
-            klass(self, sensor_port)
+            klass(brick=self, sensor_port=port, opened_from_brick=True)
         except AttributeError:
-            print "Provided sensor does not exists: ", sensor_name
+            pass  # meh don't care
+            # print "Provided sensor does not exists: ", sensor_name
 
-    def _automatically_close_sensor_callback(self, sensor_port):
-        if sensor_port in self._opened_ports:
-            self._opened_ports[sensor_port].close()
+    def _automatically_close_sensor_callback(self, port):
+        if port in self._opened_ports:
+            self._opened_ports[port].close()
         else:
             print "Something strange has happened. Trying to close a sensor, not there anymore"
 

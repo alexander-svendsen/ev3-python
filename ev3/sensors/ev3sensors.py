@@ -9,12 +9,11 @@ class EV3GyroSensor(Sensor):
     Class for the Lego EV3 Gyro sensor.
     When the sensor changes between the modes it resets, therefor it should be motionless during this operation
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has two modes, RateMode and AngleMode
         """
-        super(EV3GyroSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.RateMode(self), self.AngleMode(self)]
+        return [self.RateMode(self), self.AngleMode(self)]
 
     def get_rate_mode(self):
         """
@@ -54,12 +53,11 @@ class EV3ColorSensor(Sensor):
     """
     Class for the Lego EV3 Color sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has four modes, ColorID, Red, RGB and Ambient mode.
         """
-        super(EV3ColorSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.ColorIDMode(self), self.RedMode(self), self.RGBMode(self), self.AmbientMode(self)]
+        return [self.ColorIDMode(self), self.RedMode(self), self.RGBMode(self), self.AmbientMode(self)]
 
     def get_color_id_mode(self):
         """
@@ -127,12 +125,11 @@ class EV3UltrasonicSensor(Sensor):
     """
     Class for the Lego EV3 Ultrasonic sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has two modes, Distance and Listen mode.
         """
-        super(EV3UltrasonicSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.DistanceMode(self), self.ListenMode(self)]
+        return [self.DistanceMode(self), self.ListenMode(self)]
 
     def enable(self):
         """

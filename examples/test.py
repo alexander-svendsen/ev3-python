@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import ev3
+import ev3, time
 from ev3 import subscription
 
 brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
@@ -8,9 +8,11 @@ sub = subscription.Subscription()
 brick.set_subscription(sub)
 print "ev1"
 ev3_touch1 = ev3.EV3TouchSensor(brick, 1)  # should not raise an exception
-print "ev2"
-print ".... Do it get here?"
-# nxt_touch = ev3.NXTTouchSensor(brick, 4)
+print "first sensor connected"
+nxt_touch = ev3.NXTTouchSensor(brick, 4)
+print "second sensor connected"
+time.sleep(5)
+print "Complete"
 #
 # # while True:
 # #     start = time.time()

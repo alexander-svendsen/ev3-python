@@ -29,10 +29,7 @@ class Message(object):
 class MessageHandler(object):
     def __init__(self, communication_obj):
         """
-        @param callback: function that will be called with data when receiving an event
         @param communication_obj: Socket used for communicating with the brick
-
-        @type callback: callable
         @type communication_obj: communication.Communication
         """
         self._callback = lambda x: None
@@ -70,7 +67,10 @@ class MessageHandler(object):
                         self._message_queue[data["seq"]] = Message()
                         self._message_queue[data["seq"]].msg = data
             else:
-                self._callback(data)  # send the event backwards
+                try:
+                    self._callback(data)  # send the event backwards
+                except Exception as e:
+                    print e
 
     def _receive_forever(self):
         while True:

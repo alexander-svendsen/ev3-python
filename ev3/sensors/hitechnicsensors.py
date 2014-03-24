@@ -7,12 +7,11 @@ class HiTechnicColorSensor(Sensor):
     """
     Class for the HiTechnic NXT Color Sensor.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has two modes, ColorID, and RGB mode.
         """
-        super(HiTechnicColorSensor, self).__init__(brick, sensor_port)
-        self._available_modes = [self.ColorIDMode(self), self.RGBMode(self)]
+        return [self.ColorIDMode(self), self.RGBMode(self)]
 
     def get_color_id_mode(self):
         """
@@ -59,12 +58,11 @@ class HiTechnicAccelerometer(Sensor):
     Measures the range -2g to +2g.
     Can be used for tilt measuring since gravity is distributed among the three components.
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor has one mode, Acceleration mode.
         """
-        super(HiTechnicAccelerometer, self).__init__(brick, sensor_port)
-        self._available_modes = [self.AccelerationMode(self)]
+        return [self.AccelerationMode(self)]
 
     def get_acceleration_mode(self):
         """
@@ -85,12 +83,8 @@ class HiTechnicGyro(Sensor):
     """
     Class for the HiTechnic NXT Gyro Sensor.
     """
-    def __init__(self, brick, sensor_port):
-        """
-        This sensor has one mode, Gyro mode
-        """
-        super(HiTechnicGyro, self).__init__(brick, sensor_port)
-        self._available_modes = [self.GyroMode(self)]
+    def _get_modes(self):
+        return [self.GyroMode(self)]
 
     def get_gyro_mode(self):
         """
@@ -110,9 +104,8 @@ class HiTechnicCompass(Sensor):
     """
     Class for the HiTechnic NXT Compass Sensor.
     """
-    def __init__(self, brick, sensor_port):
-        super(HiTechnicCompass, self).__init__(brick, sensor_port)
-        self._available_modes = [self.CompassMode(self)]
+    def _get_modes(self):
+        return [self.CompassMode(self)]
 
     def get_compass_mode(self):
         """
@@ -151,12 +144,11 @@ class HiTechnicIRSeeker(Sensor):
     controller.
     Don't have it, so can't test this
     """
-    def __init__(self, brick, sensor_port):
+    def _get_modes(self):
         """
         This sensor only got one mode, Unmodulated mode
         """
-        super(HiTechnicIRSeeker, self).__init__(brick, sensor_port)
-        self._available_modes = [self.UnmodulatedMode(self)]
+        return [self.UnmodulatedMode(self)]
 
     def get_unmodulated_mode(self):
         """
