@@ -55,14 +55,14 @@ class Mode(object):
 class Sensor(object):
     initialized = False
 
-    def __new__(cls, brick, sensor_port, opened_from_brick=False):  # review: write about this in the report
+    def __new__(cls, brick, sensor_port):  # review: write about this in the report
         if sensor_port in brick.get_opened_ports:
             sensor = brick.get_opened_ports[sensor_port]
             if sensor.__class__ == cls:
                 return sensor
-        return super(Sensor, cls).__new__(cls, brick, sensor_port, opened_from_brick)
+        return super(Sensor, cls).__new__(cls, brick, sensor_port)
 
-    def __init__(self, brick, sensor_port, opened_from_brick=False):
+    def __init__(self, brick, sensor_port):
         """
         Opens the specified sensor at the provided port. Note this class is not meant to be used by itself, but as a
         parent class for other sensors.
@@ -89,10 +89,9 @@ class Sensor(object):
         self._cmd = {"cla": "sensor",
                      "sensor_port": (self._sensor_port - 1)}
 
-        if not opened_from_brick:  # if not a callback command, we need to open it ourselves
-            response = self._send_command("open_sensor", sensor_class_name=self.__class__.__name__)
-            if not response["data"]:
-                raise InvalidSensorPortException("Can't open sensor")
+        response = self._send_command("open_sensor", sensor_class_name=self.__class__.__name__)
+        if not response["data"]:
+            raise InvalidSensorPortException("Can't open sensor")
 
         # classes that inherit this variable should override it with the correct mode values
         self._available_modes = self._get_modes()

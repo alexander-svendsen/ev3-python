@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import error
 import asynchronous
-import sensors
+import logging
+
+module_logger = logging.getLogger('ev3.brick')
 
 
 class Battery(object):
@@ -81,24 +83,9 @@ class Brick(object):
     def set_subscription(self, sub):
         self.sub = sub
         self.sub.send_subscribe_commands_to(self._message_handler)
-        self.sub.subscribe_on_sensor_added(self._automatically_open_sensor_callback)
 
     def remove_subscription(self):
         self.sub.close()
-
-    def _automatically_open_sensor_callback(self, sensor_name, port):
-        try:
-            klass = getattr(sensors, sensor_name)
-            klass(brick=self, sensor_port=port, opened_from_brick=True)
-        except AttributeError:
-            pass  # meh don't care
-            # print "Provided sensor does not exists: ", sensor_name
-
-    def _automatically_close_sensor_callback(self, port):
-        if port in self._opened_ports:
-            self._opened_ports[port].close()
-        else:
-            print "Something strange has happened. Trying to close a sensor, not there anymore"
 
     def close(self):
         open_ports = self._opened_ports.keys()

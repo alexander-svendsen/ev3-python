@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+import logging
+
+# create logger
+logger = logging.getLogger('ev3')  # Top module logger
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter(
+    '%(levelname)s - %(asctime)s - %(name)s - %(funcName)s - %(message)s')
+
+channel = logging.StreamHandler()
+channel.setLevel(logging.DEBUG)
+channel.setFormatter(formatter)
+
+logger.addHandler(channel)
 
 from discover import connect_to_brick, find_brick_by_name
 from brick import Brick

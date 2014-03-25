@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import threading
 import json
+import logging
 
-MAX_SEQ = 65000
+_MODULE_LOGGER = logging.getLogger('ev3.asynchronous')
+_MAX_SEQ = 65000
 
 
 class Message(object):
@@ -58,6 +60,8 @@ class MessageHandler(object):
         temp = self._buffer.split("\n")
         self._buffer = temp.pop()
         for line in temp:
+            _MODULE_LOGGER.debug("Received: %s", line)
+
             data = json.loads(line)
             if data["msg"] == "response":
                 with self._send_lock:
@@ -68,9 +72,9 @@ class MessageHandler(object):
                         self._message_queue[data["seq"]].msg = data
             else:
                 try:
-                    self._callback(data)  # send the event backwards
-                except Exception as e:
-                    print e
+                    self._callback(data)  # the subscription module should be the one here,
+                except:
+                    _MODULE_LOGGER.exception("Exception in callback, should not be used except by subscription module")
 
     def _receive_forever(self):
         while True:
@@ -87,7 +91,7 @@ class MessageHandler(object):
 
     def send(self, data, immediate_return=False):
         with self._send_lock:
-            self._sequence = (self._sequence + 1) % MAX_SEQ
+            self._sequence = (self._sequence + 1) % _MAX_SEQ
             seq = self._sequence
             if not immediate_return:
                 self._message_queue[seq] = Message()
