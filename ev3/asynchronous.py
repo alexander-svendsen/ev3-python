@@ -64,12 +64,9 @@ class MessageHandler(object):
 
             data = json.loads(line)
             if data["msg"] == "response":
-                with self._send_lock:
-                    if data["seq"] in self._message_queue:
-                        self._message_queue[data["seq"]].msg = data
-                    else:
-                        self._message_queue[data["seq"]] = Message()
-                        self._message_queue[data["seq"]].msg = data
+                # If not inside the queue, it means the user was not interested in the response, even tough we got it
+                if data["seq"] in self._message_queue:
+                    self._message_queue[data["seq"]].msg = data
             else:
                 try:
                     self._callback(data)  # the subscription module should be the one here,
@@ -96,8 +93,9 @@ class MessageHandler(object):
             if not immediate_return:
                 self._message_queue[seq] = Message()
 
-        data["seq"] = seq
-        self._communication_method.send(json.dumps(data) + '\n')
+            data["seq"] = seq
+            self._communication_method.send(json.dumps(data) + '\n')
+
         del data["seq"]  # to hide seq from the users point of view
         return seq
 
