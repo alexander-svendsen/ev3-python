@@ -3,6 +3,9 @@ import config
 import error
 import ipsocket
 import brick
+import logging
+
+_MODULE_LOGGER = logging.getLogger('ev3.discover')
 
 
 class NoValidCommunicationChosenException(Exception):
@@ -17,6 +20,8 @@ def connect_to_brick(address, port, by_ip=True, by_bluetooth=True):
 
             if bluetooth.is_valid_address(address):
                 try:
+                    _MODULE_LOGGER.debug("Bluetooth address found, trying to connect to brick")
+
                     socket = bluesocket.BlueSocket()
                     socket.connect(address, port)
                     return brick.Brick(socket)
@@ -29,6 +34,8 @@ def connect_to_brick(address, port, by_ip=True, by_bluetooth=True):
 
     if by_ip:
         try:
+            _MODULE_LOGGER.debug("Connecting to brick by IP")
+
             socket = ipsocket.IpSocket()
             socket.connect(address, port)
             return brick.Brick(socket)
@@ -43,6 +50,9 @@ def find_brick_by_name(name, by_ip=True, by_bluetooth=True):
         try:
             socket = ipsocket.IpSocket()
             socket.connect_by_hostname(hostname=name, port=config.IP_SOCKET_PORT)
+
+            _MODULE_LOGGER.debug("Found brick with IP")
+
             return brick.Brick(socket)
         except error.BrickNotFoundException:
             pass
@@ -54,6 +64,9 @@ def find_brick_by_name(name, by_ip=True, by_bluetooth=True):
 
             socket = bluesocket.BlueSocket()
             socket.connect_by_hostname(hostname=name, port=config.BLUETOOTH_PORT)
+
+            _MODULE_LOGGER.debug("Found brick with bluetooth")
+
             return brick.Brick(socket)
         except (ImportError, error.BrickNotFoundException, IOError, bluetooth.BluetoothError):
             pass
@@ -73,6 +86,8 @@ def find_all_nearby_devices(by_ip=True, by_bluetooth=True):
             devices.extend(bluesocket.BlueSocket.get_nearby_devices())
         except (ImportError, IOError):
             pass
+
+    _MODULE_LOGGER.debug("Found devices: %s", devices)
     return devices
 
 

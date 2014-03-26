@@ -3,7 +3,7 @@ import error
 import asynchronous
 import logging
 
-module_logger = logging.getLogger('ev3.brick')
+_MODULE_LOGGER = logging.getLogger('ev3.brick')
 
 
 class Battery(object):
@@ -47,7 +47,7 @@ class Brick(object):
         self.battery = Battery()
         self.hostname = ""
         self.refresh_battery()
-        self.sub = None
+        self.subscription = None
 
     def get_battery(self):
         return self.battery
@@ -80,17 +80,36 @@ class Brick(object):
             raise error.BrickNotConnectedException("Brick not connected")
         return data
 
-    def set_subscription(self, sub):
-        self.sub = sub
-        self.sub.send_subscribe_commands_to(self._message_handler)
+    def set_subscription(self, subscription):
+        """
+        @param subscription: subscription module
+        @type subscription: Subscription
+        """
+        self.subscription = subscription
+        self.subscription.start_subscriptions(self._message_handler)
+        self.subscription.subscribe_on_samples(self._data_stream_cache)
+
+    def _data_stream_cache(self, samples):
+        for port, sample in enumerate(samples):
+            port += 1
+            if sample:
+                if port in self._opened_ports:
+                    self._opened_ports[port].set_cache_data(sample)
+                else:
+                    _MODULE_LOGGER.warning("Got a sample for a port not containing a sensor. Port=%s, Sample=%s",
+                                           port, sample)
 
     def remove_subscription(self):
-        self.sub.close()
+        self.subscription.close()
+        for x in xrange(1, 5):
+            if x in self._opened_ports:
+                self._opened_ports[x].set_cache_data(None)
 
     def close(self):
         open_ports = self._opened_ports.keys()
         for port in open_ports:
             self._opened_ports[port].close()
+        self.subscription.close()
 
     def __del__(self):
         self.close()

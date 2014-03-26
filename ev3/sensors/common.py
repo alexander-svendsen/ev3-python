@@ -10,8 +10,8 @@ SENSOR_PORTS = _sensor_ports_named_tuple(1, 2, 3, 4)  # The only valid sensor po
 
 def cache(function):
     def new_function(self, *args, **kwargs):
-        if self.cache_data:
-            return self.cache_data
+        if self._cache_data:
+            return self._cache_data
         return function(self, *args, **kwargs)
     return new_function
 
@@ -99,7 +99,7 @@ class Sensor(object):
         # every sensor starts on mode 0
         self._selected_mode = 0
         self.initialized = True
-        self.cache_data = None
+        self._cache_data = None
 
     def _get_modes(self):
         return [Mode(self)]  # Should be overwritten
@@ -161,7 +161,7 @@ class Sensor(object):
         return self._available_modes[self._selected_mode].get_sample_size()
 
     def set_cache_data(self, data):
-        self.cache_data = data
+        self._cache_data = data
 
     @cache
     def get_raw_data(self):

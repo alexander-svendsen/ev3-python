@@ -8,6 +8,13 @@ _MODULE_LOGGER = logging.getLogger('ev3.subscription')
 
 
 class Subscription(object):
+    """
+    Subscription module. It starts a subscription for events at the brick and all the provided callback the user has
+    provided.
+
+    NOTE: usage is a little different from how the modules usually interacts with the brick, since the brick
+    must take it in instead of the other way
+    """
     def __init__(self, subscribe_on_sensor_changes=True, subscribe_on_stream_data=True):
         self._subscribe_on_sensor_changes = subscribe_on_sensor_changes
         self._subscribe_on_stream_data = subscribe_on_stream_data
@@ -22,13 +29,21 @@ class Subscription(object):
 
         self._thread = threading.Thread(name="subscription_thread", target=self._run_events, args=())
         self._thread.daemon = True
-        self._thread.start()
 
     def _send_subscribe(self, command):
         cmd = {"cla": "subscribe", "cmd": command}
         self._message_handler.send(data=cmd, immediate_return=True)
 
-    def send_subscribe_commands_to(self, message_handler):
+    def start_subscriptions(self, message_handler):
+        """
+        Starts the subscriptions at the brick
+
+        Meant to be used directly by the brick, not the user. The brick setups the appropriate communication parameters
+        and such since the subscription module need direct access so it can change the communication callback
+        @param message_handler: which communication module should be used
+        @type message_handler: MessageHandler
+        """
+        self._thread.start()
         self._message_handler = message_handler
         self._message_handler.set_callback(self._add_event)
 
@@ -54,19 +69,45 @@ class Subscription(object):
             callback(samples=samples)
 
         for port, sample in enumerate(samples):
-            for callback in self.stream_callback[port + 1]:
+            for callback in self.stream_callback[port + 1]:  # Since port is one of
                 callback(sample=sample)
 
-    def subscribe_on_streams(self, callback):
+    def subscribe_on_samples(self, callback):
+        """
+        Subscribe on samples. Will call the provided function with a list of samples on all ports. The samples look like
+        this: [[sample1], [sample2], [sample3], [sample4]], since each sample may consist of multiple samples.
+        @param callback: function to call when streams is received. Must either take in arguments **kwargs or samples
+        """
         self.callbacks["samples"].append(callback)
 
-    def subscribe_on_stream_on_port(self, port, callback):
+    def subscribe_on_samples_in_port(self, port, callback):
+        """
+        Subscribe on a single stream of sample in the provided port. The sample looks like this: [sample]
+        @param port: sensor port to subscribe on
+        @param callback: function to call when stream is received. Must either take in arguments **kwargs or sample
+        """
         self.stream_callback[port].append(callback)
 
     def subscribe_on_new_sensor(self, callback):
+        """
+        Subscribe on a message when a new sensor is connected. The name of the sensor is returned to the callback. It is
+        not yet opened, so it's left to the user to decide what they want to do with the information. Note some
+        sensor may not exists at this side yet, or in some cases it simply does not know what sensor it is, only the
+        type. Like the case of most analog sensors.
+        @param callback: function to call when sensor is connected. Must either take in arguments **kwargs or
+        sensor_name, port
+
+        """
         self.callbacks["new_sensor"].append(callback)
 
     def subscribe_on_no_sensor(self, callback):
+        """
+        Subscribe on a message when there is no sensor connected. A message is sent to the callback, providing
+        information on the port, like if there is a sensor there, or if a sensor is connected, but has been wrongly
+        connected.
+        @param callback: function to call when there is no sensor at the port. Must either take in arguments **kwargs or
+        msg, port
+        """
         self.callbacks["no_sensor"].append(callback)
 
     def _add_event(self, data):
@@ -79,7 +120,6 @@ class Subscription(object):
 
     def _parse_event(self, data):
         try:
-            _MODULE_LOGGER.debug("Parsing event: %s", data)
             if data["msg"] == "sensor_info":
                 if data["sample_string"] != "None":
                     self._new_sensor(data)
@@ -92,5 +132,9 @@ class Subscription(object):
         except:
             _MODULE_LOGGER.exception("Something went wrong in a callback")
 
-    def close(self):  # TODO close the active subscriptions
+    def close(self):
         self.running = False
+        self._send_subscribe("close")
+
+    def __del__(self):
+        self.close()
