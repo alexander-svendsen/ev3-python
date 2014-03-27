@@ -12,7 +12,7 @@ class NoValidCommunicationChosenException(Exception):
     pass
 
 
-def connect_to_brick(address, port, by_ip=True, by_bluetooth=True):
+def connect_to_brick(address, port=config.IP_SOCKET_PORT, by_ip=True, by_bluetooth=True):
     if by_bluetooth:
         try:
             import bluetooth

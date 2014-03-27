@@ -61,19 +61,14 @@ class Motor(object):
         packet = self._cmd.copy()
         packet.update(extra_command)
 
-        if immediate_return:
-            self._brick.send_command(json.dumps(packet))
-        else:
-            packet["immediate"] = immediate_return
-            data = self._brick.send_command(packet)
-            if data in (None, ''):
-                raise error.BrickNotConnectedException("Brick not connected anymore!")
-            return data
+        packet["immediate"] = immediate_return
+        data = self._brick.send_command(packet, immediate_return)
+        return data
 
     def _get_data(self, cmd):
         self._cmd["cmd"] = cmd
-        data = self._brick.send_command(json.dumps(self._cmd))
-        return json.loads(data)
+        data = self._brick.send_command(self._cmd)
+        return data
 
     def forward(self):
         """
@@ -87,7 +82,7 @@ class Motor(object):
         """
         self._send_command("backward", True)
 
-    def stop(self, immediate=True):
+    def stop(self, immediate=False):
         """
         Stops the current action of the motor instantaneously. The motor will reset any further motion
         @param immediate:   If true it will not block until the motor has come to a complete stop.
@@ -97,7 +92,7 @@ class Motor(object):
         """
         self._send_command("stop", immediate)
 
-    def rotate(self, degrees, immediate_return=True):
+    def rotate(self, degrees, immediate_return=False):
         """
         Rotates the motor by the number of degrees provided
         @param degrees: The number of degrees the motor should rotate
@@ -106,9 +101,9 @@ class Motor(object):
         @type degrees: int
         @type immediate_return: bool
         """
-        self._send_command("rotate", immediate_return, degrees=str(degrees))
+        self._send_command("rotate", immediate_return, degrees=degrees)
 
-    def rotate_to(self, angle, immediate_return=True):
+    def rotate_to(self, angle, immediate_return=False):
         """
         Rotates the motor to the angle specified
         @param angle: The number of degrees the motor should rotate
@@ -117,7 +112,7 @@ class Motor(object):
         @type angle: int
         @type immediate_return: bool
         """
-        self._send_command("rotate_to", immediate_return, degrees=str(angle))
+        self._send_command("rotate_to", immediate_return, degrees=angle)
 
     def set_speed(self, speed):
         """

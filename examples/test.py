@@ -4,31 +4,37 @@ from ev3 import subscription
 
 brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
 
+print "playing tune"
+# brick.beep()
+brick.buzz()
 
-def print_func(**kwargs):
-    print "Got a callback with args", kwargs
-
-sub = subscription.Subscription()
-brick.set_subscription(sub)
-
-
-# sub.subscribe_on_new_sensor(print_func)
-print "ev1"
-ev3_touch1 = ev3.EV3TouchSensor(brick, 1)  # should not raise an exception
-touch = ev3_touch1.get_touch_mode()
-print "first sensor connected"
-nxt_touch = ev3.NXTTouchSensor(brick, 4)
-
-sub.subscribe_on_samples_in_port(1, print_func)
-sub.subscribe_on_samples(print_func)
-# for _ in xrange(10000):
-#     if touch.is_pressed():
-#         print "YESSSSSSSS"
-#     time.sleep(0.1)
-
-print "second sensor connected"
-time.sleep(5)
-print "Complete"
+# def print_func(**kwargs):
+#     print "Got a callback with args", kwargs
+#
+# sub = subscription.Subscription()
+# brick.set_subscription(sub)
+#
+#
+# # sub.subscribe_on_new_sensor(print_func)
+# print "ev1"
+# ev3_touch1 = ev3.EV3TouchSensor(brick, 1)  # should not raise an exception
+# touch = ev3_touch1.get_touch_mode()
+# print "first sensor connected"
+# nxt_touch = ev3.NXTTouchSensor(brick, 4)
+#
+# sub.subscribe_on_samples_in_port(1, print_func)
+# sub.subscribe_on_samples(print_func)
+# # for _ in xrange(10000):
+# #     if touch.is_pressed():
+# #         print "YESSSSSSSS"
+# #     time.sleep(0.1)
+#
+# print "second sensor connected"
+# time.sleep(5)
+# print "Complete"
+#
+# def INIT(engine):
+#     print "??"
 
 #
 # # while True:

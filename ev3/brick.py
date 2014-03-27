@@ -49,6 +49,8 @@ class Brick(object):
         self.refresh_battery()
         self.subscription = None
 
+        self.mute = False # blocks sound messages
+
     def get_battery(self):
         return self.battery
 
@@ -71,8 +73,8 @@ class Brick(object):
         if port in self._opened_ports:
             del self._opened_ports[port]
 
-    def send_command(self, cmd):
-        seq = self._message_handler.send(cmd)
+    def send_command(self, cmd, immediate_return=False):
+        seq = self._message_handler.send(cmd, immediate_return)
         data = self._message_handler.receive(seq)
 
         # if anything has gone wrong in the async handler, the exception flag is set to true.
@@ -105,11 +107,24 @@ class Brick(object):
             if x in self._opened_ports:
                 self._opened_ports[x].set_cache_data(None)
 
+    def play_tone(self, frequency, duration):
+        if not self.mute:
+            self.send_command({"cla": "sound", "cmd": "play_tone", "freqency": frequency, "time": duration})
+
+    def buzz(self):
+        if not self.mute:
+            self.send_command({"cla": "sound", "cmd": "buzz"})
+
+    def beep(self):
+        if not self.mute:
+            self.send_command({"cla": "sound", "cmd": "beep"})
+
     def close(self):
         open_ports = self._opened_ports.keys()
         for port in open_ports:
             self._opened_ports[port].close()
-        self.subscription.close()
+        if self.subscription:
+            self.subscription.close()
 
     def __del__(self):
         self.close()
