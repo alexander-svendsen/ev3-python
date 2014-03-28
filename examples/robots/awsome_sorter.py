@@ -12,7 +12,6 @@ class AwesomeSorter():
         self._throw_out_motor = ev3.Motor(self._brick, MOTOR_PORTS.PORT_A)
         self._throw_out_motor.set_speed(640)
         self._throw_out_motor.rotate(180, True)
-        self._brick.mute = True
 
         ev3_color_sensor = ev3.EV3ColorSensor(self._brick, SENSOR_PORTS.PORT_3)
         ev3_touch_sensor = ev3.EV3TouchSensor(self._brick, SENSOR_PORTS.PORT_1)
@@ -84,7 +83,7 @@ class AwesomeSorter():
             except StopIteration:
                 peek = None
         self._brick.buzz()
-
+        self._throw_out_motor.rotate(-180)
         print "complete!"
 
 if __name__ == "__main__":
