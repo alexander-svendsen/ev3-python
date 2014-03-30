@@ -33,14 +33,14 @@ class AwesomeSorter():
         if movement:  # no point sending a command if there isn't anying to send
             self._belt_motor.rotate(movement)
 
-    def move_to_belt_to_start_position(self):
+    def move_belt_to_start_position(self):
         self._belt_motor.backward()
         while not self._touch.is_pressed():
             pass
         self._belt_motor.stop()
         self._belt_motor.rotate(30)  # move a little away from the touch sensor
 
-    def throw_a_lego_piece_out(self, quick_mode=True):  # the lego piece should be at the start position, as in the manual.
+    def throw_a_lego_piece_out(self, quick_mode=True):
         self._throw_out_motor.rotate(-180)
         self._throw_out_motor.rotate(180, quick_mode)
 
@@ -66,7 +66,7 @@ class AwesomeSorter():
         self._brick.beep()
         time.sleep(2)
 
-        self.move_to_belt_to_start_position()
+        self.move_belt_to_start_position()
 
         peeper, color_iterator = itertools.tee(color_list)
         peeper.next()

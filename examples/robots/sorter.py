@@ -36,7 +36,7 @@ class Sorter():
     def move_to_red_position(self):
         self.belt_motor.rotate(550)
 
-    def move_to_belt_to_start_position(self):
+    def move_belt_to_start_position(self):
         self.belt_motor.backward()
         while not self.touch.is_pressed():
             pass
@@ -73,7 +73,7 @@ class Sorter():
         time.sleep(2)
 
         for color in color_list:
-            self.move_to_belt_to_start_position()
+            self.move_belt_to_start_position()
             self.color_movement[color]()
             self.throw_a_lego_piece_out()
 

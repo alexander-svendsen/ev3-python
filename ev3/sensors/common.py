@@ -8,14 +8,6 @@ _sensor_ports_named_tuple = collections.namedtuple('SensorPorts', "PORT_1 PORT_2
 SENSOR_PORTS = _sensor_ports_named_tuple(1, 2, 3, 4)  # The only valid sensor ports
 
 
-def cache(function):
-    def new_function(self, *args, **kwargs):
-        if self._cache_data:
-            return self._cache_data
-        return function(self, *args, **kwargs)
-    return new_function
-
-
 class Mode(object):
     def __init__(self, sensor):
         """
@@ -163,8 +155,12 @@ class Sensor(object):
     def set_cache_data(self, data):
         self._cache_data = data
 
-    @cache
-    def get_raw_data(self):
+    def get_raw_data(self, invalidate_cache=False):
+        if self._cache_data:  # See if anything is cached and return this.
+            cached_data = self._cache_data
+            if invalidate_cache:
+                self._cache_data = None
+            return cached_data
         return self._send_command("fetch_sample")["sample"]
 
     def get_selected_mode(self):
