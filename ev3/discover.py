@@ -12,7 +12,7 @@ class NoValidCommunicationChosenException(Exception):
     pass
 
 
-def connect_to_brick(address, port=config.IP_SOCKET_PORT, by_ip=True, by_bluetooth=True):
+def connect_to_brick(address, by_ip=True, by_bluetooth=True):
     if by_bluetooth:
         try:
             import bluetooth
@@ -23,7 +23,7 @@ def connect_to_brick(address, port=config.IP_SOCKET_PORT, by_ip=True, by_bluetoo
                     _MODULE_LOGGER.debug("Bluetooth address found, trying to connect to brick")
 
                     socket = bluesocket.BlueSocket()
-                    socket.connect(address, port)
+                    socket.connect(address, config.BLUETOOTH_PORT)
                     return brick.Brick(socket)
 
                 except bluetooth.BluetoothError:
@@ -37,7 +37,7 @@ def connect_to_brick(address, port=config.IP_SOCKET_PORT, by_ip=True, by_bluetoo
             _MODULE_LOGGER.debug("Connecting to brick by IP")
 
             socket = ipsocket.IpSocket()
-            socket.connect(address, port)
+            socket.connect(address, config.IP_SOCKET_PORT)
             return brick.Brick(socket)
         except:
             raise error.BrickNotFoundException("Did you provide the correct ip address and port?")
