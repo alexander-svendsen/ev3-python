@@ -3,7 +3,7 @@
 import ev3
 import time
 
-brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
+brick = ev3.connect_to_brick(address='10.0.1.1')
 
 ultra = ev3.NXTUltrasonicSensor(brick, 1)
 

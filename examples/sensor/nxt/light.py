@@ -1,7 +1,7 @@
 import ev3
 import time
 
-brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
+brick = ev3.connect_to_brick(address='10.0.1.1')
 
 light_sensor = ev3.NXTLightSensor(brick, 1)
 

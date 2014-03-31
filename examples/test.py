@@ -2,7 +2,7 @@
 import ev3, time
 from ev3 import subscription
 
-brick = ev3.connect_to_brick(address='10.0.1.1', port=9200)
+brick = ev3.connect_to_brick(address='10.0.1.1')
 
 print "playing tune"
 # brick.beep()

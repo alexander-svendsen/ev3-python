@@ -6,8 +6,8 @@ import time
 
 
 class AwesomeSorter():
-    def __init__(self, ip, port):
-        self._brick = ev3.connect_to_brick(ip, port)
+    def __init__(self, ip):
+        self._brick = ev3.connect_to_brick(ip)
         self._belt_motor = ev3.Motor(self._brick, MOTOR_PORTS.PORT_D)
         self._throw_out_motor = ev3.Motor(self._brick, MOTOR_PORTS.PORT_A)
         self._throw_out_motor.set_speed(640)
@@ -88,6 +88,6 @@ class AwesomeSorter():
 
 if __name__ == "__main__":
     print "Initialize the sorter"
-    sorter = AwesomeSorter('10.0.1.1', 9200)
+    sorter = AwesomeSorter('10.0.1.1')
     print "Sorter is starting"
     sorter.run_sorter()

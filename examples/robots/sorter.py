@@ -5,8 +5,8 @@ import time
 
 
 class Sorter():
-    def __init__(self, ip, port):
-        self.brick = ev3.connect_to_brick(ip, port)
+    def __init__(self, ip):
+        self.brick = ev3.connect_to_brick(ip)
         self.belt_motor = ev3.Motor(self.brick, MOTOR_PORTS.PORT_D)
         self.throw_out_motor = ev3.Motor(self.brick, MOTOR_PORTS.PORT_A)
         self.throw_out_motor.set_speed(640)
@@ -83,7 +83,7 @@ class Sorter():
 
 if __name__ == "__main__":
     print "Initialize the sorter"
-    sorter = Sorter('10.0.1.1', 9200)
+    sorter = Sorter('10.0.1.1')
     print "Sorter is starting"
     sorter.run_sorter()
 
