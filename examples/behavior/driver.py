@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import time
+
 import ev3
-from ev3 import subsumption
+import subsumption
 
 
 class DriveAround(subsumption.Behavior):

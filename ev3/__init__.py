@@ -3,7 +3,7 @@ import logging
 
 # create logger
 logger = logging.getLogger('ev3')  # Top module logger
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter(
     '%(levelname)s - %(asctime)s - %(name)s - %(funcName)s - %(message)s')
