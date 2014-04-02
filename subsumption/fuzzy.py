@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
-import math
 
 
-class FuzzyValue(object):
-    def __init__(self, start, stop):  # either falling or rising value
-        # self.max = max(start, stop)
-        # self.min = min(start, stop)
-        self.start = start
-        self.stop = stop
+def falling_fuzzy(small_value, big_value, value):
+    return 1.0 - rising_fuzzy(small_value, big_value, value)
 
-    def __call__(self, value):
-        if value <= self.start:
-            return 0.0
-        elif value >= self.stop:
-            return 1.0
 
-        return (value + abs(self.start)) / (self.stop + abs(self.start))
+def rising_fuzzy(small_value, big_value, value):
+    if value <= small_value:
+        return 0.0
+    elif value >= big_value:
+        return 1.0
+    return float(value + abs(small_value)) / float(big_value + abs(small_value))
 
 
 class State(object):  # should control everything
@@ -75,3 +70,4 @@ class Actuator(object):  #wrapper for the actuators. most cases a motor, anythin
     def action(self):
         # self.move should be used
         raise NotImplementedError("You should implement this yourself")
+
