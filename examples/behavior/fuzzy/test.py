@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fuzzy import *
+from behavior.fuzzy import *
 
 
 MIN_BLOCKING_DISTANCE = 0.0
@@ -25,7 +25,7 @@ class WheelMotor(Actuator):
         print "{0} rotate = {1}".format(self.actuator, self.move)
 
 
-class Rotate(ControlBlock):
+class Rotate(Controller):
     def __init__(self, left, right):
         super(Rotate, self).__init__()
         self.left = left
@@ -58,8 +58,8 @@ class WanderState(State):
         self.add_controller(rotate)
         self.add_controller(translate)
 
-        self.add_behavior(Forward({'rotate': (rotate, 1.0), 'translate': (translate, 1.0)}))
-        self.add_behavior(AvoidColliding({'rotate': (rotate, 1.0), 'translate': (translate, 1.0)}))
+        self.add_behavior(Forward({'rotate': rotate, 'translate': translate}))
+        self.add_behavior(AvoidColliding({'rotate': rotate, 'translate': translate}))
 
     def check(self):
         return True  # this state should never end
