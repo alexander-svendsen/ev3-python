@@ -101,7 +101,7 @@ class Motor(object):
         @type degrees: int
         @type immediate_return: bool
         """
-        self._send_command("rotate", immediate_return, degrees=degrees)
+        self._send_command("rotate", immediate_return, degrees=int(degrees))
 
     def rotate_to(self, angle, immediate_return=False):
         """
@@ -112,7 +112,7 @@ class Motor(object):
         @type angle: int
         @type immediate_return: bool
         """
-        self._send_command("rotate_to", immediate_return, degrees=angle)
+        self._send_command("rotate_to", immediate_return, degrees=int(angle))
 
     def set_speed(self, speed):
         """
@@ -147,7 +147,7 @@ class Motor(object):
         @type error: int
         @type time: int
         """
-        self._send_command("set_stall_threshold", True, time=time, error=error)
+        self._send_command("set_stall_threshold", True, time=int(time), error=int(error))
 
     def reset_tacho_count(self):
         """

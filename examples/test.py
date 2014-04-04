@@ -3,7 +3,16 @@ import ev3, time
 from ev3 import subscription
 
 brick = ev3.connect_to_brick(address='10.0.1.1')
+motor = ev3.Motor(brick, "D")
+motor.forward()
+time.sleep(2)
+print "none in speed"
+motor.set_speed(0)
 
+time.sleep(2)
+print "setting up speed again"
+motor.set_speed(700)
+time.sleep(5)
 print "playing tune"
 # brick.beep()
 brick.buzz()
