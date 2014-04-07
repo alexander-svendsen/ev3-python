@@ -55,7 +55,8 @@ class Controller():
         """
         if behaviors:
             self.behaviors = behaviors
-        self.behaviors = []
+        else:
+            self.behaviors = []
         self.wait_object = threading.Event()
         self._active_behavior = None
 

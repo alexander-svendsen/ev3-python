@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-import os
-# import ev3, time
-# from ev3 import subscription
+import ev3, time
+from ev3 import subscription
 
+brick1 = ev3.connect_to_brick(address='10.0.1.1')
+brick2 = ev3.connect_to_brick(address='10.0.1.1')
 
-# os.system('pause')
-print os.O_BINARY
-# brick = ev3.connect_to_brick(address='10.0.1.1')
+print brick1
+print brick2
+time.sleep(10)
 # motor = ev3.Motor(brick, "D")
 # motor.forward()
 # time.sleep(2)

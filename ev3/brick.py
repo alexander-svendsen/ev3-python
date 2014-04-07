@@ -49,7 +49,7 @@ class Brick(object):
         self.refresh_battery()
         self.subscription = None
 
-        self.mute = False # blocks sound messages
+        self.mute = False  # blocks sound messages
 
     def get_battery(self):
         return self.battery

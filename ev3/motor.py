@@ -18,9 +18,7 @@ class Motor(object):
 
     def __new__(cls, brick, motor_port):
         if motor_port in brick.get_opened_ports:
-            motor = brick.get_opened_ports[motor_port]
-            if motor.__class__ == cls:
-                return motor
+            return brick.get_opened_ports[motor_port]
         return super(Motor, cls).__new__(cls, brick, motor_port)
 
     def __init__(self, brick, motor_port):
