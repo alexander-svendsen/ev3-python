@@ -2,10 +2,10 @@
 import time
 
 import ev3
-import behavior
+import behavior.subsumption
 
 
-class DriveAround(behavior.Behavior):
+class DriveAround(behavior.subsumption.Behavior):
     def __init__(self, brick):
         self.left_motor = ev3.Motor(brick, ev3.MOTOR_PORTS.PORT_D)
         self.right_motor = ev3.Motor(brick, ev3.MOTOR_PORTS.PORT_A)
@@ -27,7 +27,7 @@ class DriveAround(behavior.Behavior):
         self._running = False
 
 
-class AvoidColliding(behavior.Behavior):
+class AvoidColliding(behavior.subsumption.Behavior):
     def __init__(self, brick):
         self._brick = brick
         self.left_motor = ev3.Motor(brick, ev3.MOTOR_PORTS.PORT_D)
@@ -53,7 +53,7 @@ class AvoidColliding(behavior.Behavior):
 if __name__ == "__main__":
     brick = ev3.connect_to_brick('00:16:53:3D:E4:77')
     brick.buzz()
-    conjecture = behavior.Controller(True)
+    conjecture = behavior.subsumption.Controller(True)
 
     avoid = AvoidColliding(brick)
     drive = DriveAround(brick)
