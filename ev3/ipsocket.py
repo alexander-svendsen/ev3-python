@@ -32,11 +32,15 @@ class IpSocket(communication.Communication):
                 pass  # got a time out, lets try again
         return devices.items()
 
-    def connect_by_hostname(self, hostname, port):
+    def get_address_by_hostname(self, hostname, port):
         devices = self.get_nearby_devices(port, hostname)
         for ip_address, name in devices:
             if name.lower() == hostname.lower():
                 break
         else:
             raise error.BrickNotFoundException("No brick by name {0} found".format(hostname))
+        return ip_address
+
+    def connect_by_hostname(self, hostname, port):
+        ip_address = self.get_address_by_hostname(hostname, port)
         self.connect(ip_address, port)

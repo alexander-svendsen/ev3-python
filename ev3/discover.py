@@ -6,6 +6,20 @@ import brick
 import logging
 
 _MODULE_LOGGER = logging.getLogger('ev3.discover')
+_LOADED_BRICKS = {}
+
+
+def _is_brick_already_in_memory(address, port):
+    return (address, port) in _LOADED_BRICKS
+
+
+def _stored_brick(address, port):
+    _MODULE_LOGGER.debug("Brick found in memory, returning stored instance")
+    return _LOADED_BRICKS[(address, port)]
+
+
+def _store_brick_in_memory(address, port, opened_brick):
+    _LOADED_BRICKS[(address, port)] = opened_brick
 
 
 class NoValidCommunicationChosenException(Exception):
@@ -22,9 +36,16 @@ def connect_to_brick(address, by_ip=True, by_bluetooth=True):
                 try:
                     _MODULE_LOGGER.debug("Bluetooth address found, trying to connect to brick")
 
+                    if _is_brick_already_in_memory(address, config.BLUETOOTH_PORT):
+                        return _stored_brick(address, config.BLUETOOTH_PORT)
+
                     socket = bluesocket.BlueSocket()
                     socket.connect(address, config.BLUETOOTH_PORT)
-                    return brick.Brick(socket)
+                    _brick = brick.Brick(socket)
+
+                    _store_brick_in_memory(address, config.BLUETOOTH_PORT, _brick)
+
+                    return _brick
 
                 except bluetooth.BluetoothError:
                     raise error.BrickNotFoundException("Did you provide the correct bluetooth address and port?")
@@ -36,9 +57,16 @@ def connect_to_brick(address, by_ip=True, by_bluetooth=True):
         try:
             _MODULE_LOGGER.debug("Connecting to brick by IP")
 
+            if _is_brick_already_in_memory(address, config.IP_SOCKET_PORT):
+                return _stored_brick(address, config.IP_SOCKET_PORT)
+
             socket = ipsocket.IpSocket()
             socket.connect(address, config.IP_SOCKET_PORT)
-            return brick.Brick(socket)
+            _brick = brick.Brick(socket)
+
+            _store_brick_in_memory(address, config.IP_SOCKET_PORT, _brick)
+
+            return _brick
         except:
             raise error.BrickNotFoundException("Did you provide the correct ip address and port?")
 
@@ -49,11 +77,19 @@ def find_brick_by_name(name, by_ip=True, by_bluetooth=True):
     if by_ip:
         try:
             socket = ipsocket.IpSocket()
-            socket.connect_by_hostname(hostname=name, port=config.IP_SOCKET_PORT)
+            address = socket.get_address_by_hostname(hostname=name, port=config.IP_SOCKET_PORT)
 
             _MODULE_LOGGER.debug("Found brick with IP")
 
-            return brick.Brick(socket)
+            if _is_brick_already_in_memory(address, config.IP_SOCKET_PORT):
+                return _stored_brick(address, config.IP_SOCKET_PORT)
+
+            socket.connect(address, config.IP_SOCKET_PORT)
+            _brick = brick.Brick(socket)
+
+            _store_brick_in_memory(address, config.BLUETOOTH_PORT, _brick)
+
+            return _brick
         except error.BrickNotFoundException:
             pass
 
@@ -63,11 +99,20 @@ def find_brick_by_name(name, by_ip=True, by_bluetooth=True):
             import bluesocket
 
             socket = bluesocket.BlueSocket()
-            socket.connect_by_hostname(hostname=name, port=config.BLUETOOTH_PORT)
+            address = socket.get_address_by_hostname(hostname=name)
 
             _MODULE_LOGGER.debug("Found brick with bluetooth")
 
-            return brick.Brick(socket)
+            if _is_brick_already_in_memory(address, config.BLUETOOTH_PORT):
+                return _stored_brick(address, config.BLUETOOTH_PORT)
+
+            socket.connect(address, config.BLUETOOTH_PORT)
+            _brick = brick.Brick(socket)
+
+            _store_brick_in_memory(address, config.BLUETOOTH_PORT, _brick)
+
+            return _brick
+
         except (ImportError, error.BrickNotFoundException, IOError, bluetooth.BluetoothError):
             pass
 
