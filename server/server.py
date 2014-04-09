@@ -2,7 +2,7 @@
 import flask
 import sys
 import tools
-from behavior import subsumption
+from behaviors import subsumption
 
 controller = subsumption.Controller(False)
 app = flask.Flask(__name__)

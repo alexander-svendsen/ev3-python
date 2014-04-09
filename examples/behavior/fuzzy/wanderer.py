@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from behavior.fuzzy import *
+from behaviors.fuzzy import *
 import ev3
 
 MIN_BLOCKING_DISTANCE = 0.20

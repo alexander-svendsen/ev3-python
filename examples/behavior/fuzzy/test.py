@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from behavior.fuzzy import *
+from behaviors.fuzzy import *
 
 
 MIN_BLOCKING_DISTANCE = 0.0
