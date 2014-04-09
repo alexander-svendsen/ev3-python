@@ -45,7 +45,7 @@ class Subscription(object):
         """
         self._thread.start()
         self._message_handler = message_handler
-        self._message_handler.set_callback(self._add_event)
+        self._message_handler.set_callback(self.add_event)
 
         if self._subscribe_on_sensor_changes:
             self._send_subscribe("subscribe_on_sensor_changes")
@@ -110,7 +110,7 @@ class Subscription(object):
         """
         self.callbacks["no_sensor"].append(callback)
 
-    def _add_event(self, data):
+    def add_event(self, data):
         self.queue.put_nowait(data)
 
     def _run_events(self):
