@@ -109,7 +109,7 @@ class Brick(object):
 
     def play_tone(self, frequency, duration):
         if not self.mute:
-            self.send_command({"cla": "sound", "cmd": "play_tone", "freqency": frequency, "time": duration})
+            self.send_command({"cla": "sound", "cmd": "play_tone", "frequency": frequency, "time": duration})
 
     def buzz(self):
         if not self.mute:
