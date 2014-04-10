@@ -16,7 +16,7 @@ class Battery(object):
     def get_level(self):
         if self.milli_voltage > self.level_max:
             return 3
-        elif self.milli_voltage > (self.level_min - 100):
+        elif self.milli_voltage > (self.level_min + 100):
             return 2
         elif self.milli_voltage > self.level_min:
             return 1
@@ -27,3 +27,7 @@ class Battery(object):
         if level is None:
             level = self.get_level()
         return self.messages[level]
+
+    def __str__(self):
+        return self.get_message()
+

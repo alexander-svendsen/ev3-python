@@ -15,5 +15,5 @@ channel.setFormatter(formatter)
 logger.addHandler(channel)
 
 # import asynchronous
-import brick
-sys.modules['ev3.brick'] = sys.modules.pop('manager.brick')
+# import brick
+# sys.modules['ev3.brick'] = sys.modules.pop('manager.brick')
