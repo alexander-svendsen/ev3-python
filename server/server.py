@@ -3,13 +3,12 @@ import ev3
 import flask
 import sys
 import tools
-import flask_jsonrpc
+import jsonrpc
 import brickmanager
 from behaviors import subsumption
 
-
 # controller = subsumption.Controller(False)
-brick = ev3.connect_to_brick('10.0.1.1')
+# brick = ev3.connect_to_brick('10.0.1.1')
 app = flask.Flask(__name__)
 
 
@@ -25,7 +24,7 @@ def index():
     return flask.redirect(flask.url_for('static', filename='index.html'))
 
 
-flask_jsonrpc.register('/jsonrpc/<identifier>', brickmanager.BrickManager(), app)
+jsonrpc.register_new_remote_object('/jsonrpc/<identifier>', brickmanager.BrickManager(), app)
 
 
 def main():

@@ -23,7 +23,7 @@ def main():
     # Example echo method
     payload = {
         "method": "get_battery",
-        "params": ["er feit"],
+        "params": ["satan"],
         "jsonrpc": "2.0",
         "id": 1
     }
