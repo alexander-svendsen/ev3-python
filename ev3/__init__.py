@@ -20,3 +20,5 @@ import discover
 from brick import Brick
 from motor import MOTOR_PORTS, Motor
 from sensors import *
+from subscription import Subscription
+from error import *

@@ -6,6 +6,7 @@ import tools
 import jsonrpc
 import brickmanager
 from behaviors import subsumption
+import startup
 
 # controller = subsumption.Controller(False)
 # brick = ev3.connect_to_brick('10.0.1.1')
@@ -24,11 +25,12 @@ def index():
     return flask.redirect(flask.url_for('static', filename='index.html'))
 
 
-jsonrpc.register_new_remote_object('/jsonrpc/<identifier>', brickmanager.BrickManager(), app)
+jsonrpc.register_new_remote_object('/jsonrpc', brickmanager.BrickManager(), app)
 
 
 def main():
     # tools.delete_tmp()  review: uncomment when done
+    # startup.main()
     app.run(host='127.0.0.1', port=80)
 
 if __name__ == "__main__":

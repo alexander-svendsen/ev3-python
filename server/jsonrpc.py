@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import flask
-import traceback
-import sys
 
 
 def create_valid_response(response_id=None, result=None, error=None, jsonrpc_version='2.0'):

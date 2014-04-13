@@ -5,5 +5,17 @@
 </head>
 <body>
 HELLO STUPDIO
+
+<script type='text/javascript' src="script/lib/jquery/jquery.min.js"></script>
+<script type='text/javascript' src="script/simple_jsonrpc.js"></script>
+<script>
+//    jsonrpc('jsonrpc', 'add_brick', '10.0.1.1').done(function(response){
+//        console.log(response);
+//    });
+    jsonrpc('jsonrpc', 'get_subscription_address', '10.0.1.1').done(function(response){
+        console.log(response);
+    });
+
+</script>
 </body>
 </html>
