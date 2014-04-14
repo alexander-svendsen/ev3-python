@@ -83,7 +83,7 @@ class Sensor(object):
 
         response = self._send_command("open_sensor", sensor_class_name=self.__class__.__name__)
         if not response["data"]:
-            raise InvalidSensorPortException("Can't open sensor")
+            raise SensorNotConnectedException("Can't open sensor")
 
         # classes that inherit this variable should override it with the correct mode values
         self._available_modes = self._get_modes()

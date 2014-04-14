@@ -33,7 +33,7 @@ def register_new_remote_object(path, obj, app):
             else:
                 result = method(*params, **kwargs)
 
-            if not isinstance(result, (list, dict, str, unicode, int, float, bool, type(None))):
+            if not isinstance(result, (list, dict, str, unicode, int, float, bool)):
                 result = str(result)
 
             return create_valid_response(req.get('id'), result)

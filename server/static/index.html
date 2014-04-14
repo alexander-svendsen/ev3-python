@@ -9,12 +9,33 @@ HELLO STUPDIO
 <script type='text/javascript' src="script/lib/jquery/jquery.min.js"></script>
 <script type='text/javascript' src="script/simple_jsonrpc.js"></script>
 <script>
-//    jsonrpc('jsonrpc', 'add_brick', '10.0.1.1').done(function(response){
-//        console.log(response);
-//    });
-    jsonrpc('jsonrpc', 'get_subscription_address', '10.0.1.1').done(function(response){
+    jsonrpc('jsonrpc', 'add_brick', '10.0.1.1').done(function(response){
         console.log(response);
     });
+
+    if("WebSocket" in window){
+        console.log("IT SHOULD WORK");
+    }else{
+        console.log("you don't have web sockets");
+    }
+
+
+    var socket = new WebSocket("ws://127.0.1.1:9999/");
+    socket.onopen = function(){
+        console.log("Socket has been opened!");
+        socket.send('10.0.1.1');
+    };
+    socket.onmessage = function(msg){
+//        console.log(msg);
+    };
+    socket.onerror = function(msg){
+        alert(msg);
+    };
+    socket.onclose = function(msg){
+//        alert(msg);
+    };
+
+
 
 </script>
 </body>

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import collections
 import json
-
 import error
-from brick import Brick
 
 #future_todo: fix in the future when more ports can be connected
 _motor_ports_named_tuple = collections.namedtuple('MotorPorts', "PORT_A PORT_B PORT_C PORT_D")
@@ -33,9 +31,6 @@ class Motor(object):
 
         if motor_port not in MOTOR_PORTS:
             raise error.InvalidMotorPortException("Must be a valid motor port")
-
-        if not isinstance(brick, Brick):
-            raise error.IllegalArgumentException("Invalid brick instance")
 
         if self.initialized:  # catches double init
             return

@@ -1,41 +1,32 @@
 # -*- coding: utf-8 -*-
-import threading
+import json
 import ev3
 import socket
+import functools
 from collections import defaultdict
+from lib.simplewebsocketserver import WebSocket, SimpleWebSocketServer
 
-class Server():
-    def __init__(self, addr, port, brick_identifier):
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self._sock.bind((addr, port))
-        self._sock.listen(20)
 
-        self.brick_identifier = brick_identifier
-        self.callback = None
+class SubscriptionSocket(WebSocket):
+    def __init__(self, brick_manager, server, sock, address):
+        super(SubscriptionSocket, self).__init__(server, sock, address)
+        self.brick_manager = brick_manager
 
-        self.active = True
-        self._thread = threading.Thread(name="subscription_thread", target=self.accept_connection(), args=())
-        self._thread.daemon = True
+    def handleMessage(self):
+        if self.data is None:
+            self.data = ''
 
-    def accept_connection(self):
-        while self.active:
-            client, address = self._sock.accept()
-            self.callback(self.brick_identifier, client)
+        brick_id = str(self.data)
+        if self.brick_manager.is_brick_connected(brick_id):
+            self.brick_manager.add_new_subscriptions_to_brick(brick_id, self)
+        else:
+            self.close()
 
-    def close(self, connection):
-        connection._close()
+    def handleConnected(self):
+        print self.address, 'connected'
 
-    def send(self, connection, data):
-        connection.send(data)
-
-    def receive(self, connection, length, timeout=None):
-        connection.settimeout(timeout)
-        return connection.recv(length)
-
-    @property
-    def getsockname(self):
-        return self._sock.getsockname()
+    def handleClose(self):
+        print self.address, 'closed'
 
 
 class BrickManager(object):
@@ -43,18 +34,41 @@ class BrickManager(object):
         self._connected_brick = {}
         self._subscriptions_servers = {}
         self._subscription_clients = defaultdict(list)
+        self._subscription_objects = {}
 
-    def _is_brick_connected(self, address):
+    def is_brick_connected(self, address):
         return address in self._connected_brick
 
     def _is_there_a_subscription_address(self, address):
         return address in self._subscriptions_servers
 
-    def _add_new_subscriptions_to_brick(self, address, client):
+    def add_new_subscriptions_to_brick(self, address, client):
         self._subscription_clients[address].append(client)
 
+        if address not in self._subscription_objects:
+            sub = ev3.Subscription(False, True)
+            sub.subscribe_on_samples(functools.partial(self._callback_on_samples, address))
+            self._connected_brick[address].set_subscription(sub)
+            self._subscription_objects[address] = sub
+
+    def _callback_on_samples(self, address, samples):
+        for client in list(self._subscription_clients[address]):
+            try:
+                data = {}
+                brick = self._connected_brick[address]
+                for port in ev3.SENSOR_PORTS:
+                    if port in brick.get_opened_ports:
+                        sensor = brick.get_opened_ports[port]
+                        mode = sensor.get_selected_mode()
+                        data[port] = {'sensor': sensor.get_name(),
+                                      'mode': mode.get_name(),
+                                      'sample': samples[port - 1]}
+                client.sendMessage(json.dumps(data))
+            except socket.error:
+                self._subscription_clients[address].remove(client)
+
     def add_brick(self, address):
-        if not self._is_brick_connected(address):
+        if not self.is_brick_connected(address):
             try:
                 brick = ev3.connect_to_brick(address)
                 self._connected_brick[address] = brick
@@ -63,16 +77,6 @@ class BrickManager(object):
 
     def get_bricks(self):
         return self._connected_brick.keys()
-
-    def get_subscription_address(self, brick_identifier):
-        if not self._is_there_a_subscription_address(brick_identifier):
-            server = Server('', 0, brick_identifier)
-            server.callback = self._add_new_subscriptions_to_brick
-            self._subscriptions_servers[brick_identifier] = server
-        return {
-            'address': self._subscriptions_servers[brick_identifier].getsockname[0],
-            'port': self._subscriptions_servers[brick_identifier].getsockname[1]
-        }
 
     def get_brick(self, address):
         return self._connected_brick[address]
