@@ -72,6 +72,13 @@ class Subscription(object):
             for callback in self.stream_callback[port + 1]:  # Since port is one of
                 callback(sample=sample)
 
+    def _brick_got_disconnected(self):
+        for callback in self.callbacks["disconnect"]:
+            callback()
+
+    def subscribe_on_brick_disconnect(self, callback):
+        self.callbacks["disconnect"].append(callback)
+
     def subscribe_on_samples(self, callback):
         """
         Subscribe on samples. Will call the provided function with a list of samples on all ports. The samples look like
@@ -120,7 +127,10 @@ class Subscription(object):
 
     def _parse_event(self, data):
         try:
-            if data["msg"] == "sensor_info":
+            if data is None:  # means the connection with the brick went down, sto running
+                self.running = None
+                self._brick_got_disconnected()
+            elif data["msg"] == "sensor_info":
                 if data["sample_string"] != "None":
                     self._new_sensor(data)
                 else:

@@ -51,6 +51,12 @@ class MessageHandler(object):
     def set_callback(self, callback):
         self._callback = callback
 
+    def _call_callback(self, data):
+        try:
+            self._callback(data)  # the subscription module should be the one here,
+        except:
+            _MODULE_LOGGER.exception("Exception in callback, callback method should run in its own thread")
+
     def _receive(self):
         raw_data = self._communication_method.receive(1024)
         if raw_data == "":
@@ -68,10 +74,7 @@ class MessageHandler(object):
                 if data["seq"] in self._message_queue:
                     self._message_queue[data["seq"]].msg = data
             else:
-                try:
-                    self._callback(data)  # the subscription module should be the one here,
-                except:
-                    _MODULE_LOGGER.exception("Exception in callback, should not be used except by subscription module")
+                self._call_callback(data)
 
     def _receive_forever(self):
         while True:
@@ -81,6 +84,7 @@ class MessageHandler(object):
                 self.exception = True
                 for key, value in self._message_queue.iteritems():
                     value.msg = {}
+                self._call_callback(None)
                 break
 
     def _is_message_available(self, seq):
