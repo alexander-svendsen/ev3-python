@@ -10,8 +10,9 @@ _LOADED_BRICKS = {}
 
 
 def _is_brick_already_in_memory(address, port):
-    return (address, port) in _LOADED_BRICKS
-
+    if (address, port) in _LOADED_BRICKS:
+        return _LOADED_BRICKS[(address, port)].closed
+    return False
 
 def _stored_brick(address, port):
     _MODULE_LOGGER.debug("Brick found in memory, returning stored instance")
@@ -20,10 +21,6 @@ def _stored_brick(address, port):
 
 def _store_brick_in_memory(address, port, opened_brick):
     _LOADED_BRICKS[(address, port)] = opened_brick
-
-
-class NoValidCommunicationChosenException(Exception):
-    pass
 
 
 def connect_to_brick(address, by_ip=True, by_bluetooth=True):
@@ -70,7 +67,7 @@ def connect_to_brick(address, by_ip=True, by_bluetooth=True):
         except:
             raise error.BrickNotFoundException("Did you provide the correct ip address and port?")
 
-    raise NoValidCommunicationChosenException("You must choose either ip or bluetooth as a communication option")
+    raise error.NoValidCommunicationChosenException("You must choose either ip or bluetooth as a communication option")
 
 
 def find_brick_by_name(name, by_ip=True, by_bluetooth=True):

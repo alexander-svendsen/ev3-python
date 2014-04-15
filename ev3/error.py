@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
+class NoValidCommunicationChosenException(Exception):
+    pass
+
+
 class IllegalArgumentException(ValueError):
     pass
 

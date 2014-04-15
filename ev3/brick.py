@@ -23,7 +23,7 @@ class Brick(object):
         self.subscription = None
 
         self.mute = False  # blocks sound messages
-        self._closed = False
+        self.closed = False
 
     def get_battery(self):
         return self.battery
@@ -48,7 +48,7 @@ class Brick(object):
             del self._opened_ports[port]
 
     def send_command(self, cmd, immediate_return=False):
-        if self._closed:
+        if self.closed:
             raise error.BrickNotConnectedException("Brick closed, you cannot use this object anymore")
 
         seq = self._message_handler.send(cmd, immediate_return)
@@ -104,7 +104,7 @@ class Brick(object):
             self.subscription.close()
 
         self._message_handler.close()
-        self._closed = True
+        self.closed = True
 
     def __del__(self):
         self.close()
