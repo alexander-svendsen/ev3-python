@@ -48,6 +48,8 @@ class MessageHandler(object):
         self._thread.start()
         self._send_lock = threading.Lock()
 
+        self._running = True
+
     def set_callback(self, callback):
         self._callback = callback
 
@@ -77,7 +79,7 @@ class MessageHandler(object):
                 self._call_callback(data)
 
     def _receive_forever(self):
-        while True:
+        while self._running:
             try:
                 self._receive()
             except:  # if anything wrong happen it means the brick got disconnected
@@ -85,7 +87,7 @@ class MessageHandler(object):
                 for key, value in self._message_queue.iteritems():
                     value.msg = {}
                 self._call_callback(None)
-                break
+                self.close()
 
     def _is_message_available(self, seq):
         return bool(self._message_queue[seq])
@@ -112,3 +114,7 @@ class MessageHandler(object):
         del self._message_queue[seq]
         del message["seq"]  # to hide seq from the users point of view
         return message
+
+    def close(self):
+        self._running = False
+        self._communication_method.close()
