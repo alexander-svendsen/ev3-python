@@ -128,7 +128,7 @@ class Subscription(object):
     def _parse_event(self, data):
         try:
             if data is None:  # means the connection with the brick went down, sto running
-                self.running = None
+                self.running = False
                 self._brick_got_disconnected()
             elif data["msg"] == "sensor_info":
                 if data["sample_string"] != "None":

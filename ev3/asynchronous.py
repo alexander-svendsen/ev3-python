@@ -43,12 +43,13 @@ class MessageHandler(object):
         self._sequence = 0
         self.exception = False  # exception tracker
 
+        self._running = True
+
         self._thread = threading.Thread(name="receive_thread", target=self._receive_forever, args=())
         self._thread.daemon = True
         self._thread.start()
         self._send_lock = threading.Lock()
 
-        self._running = True
 
     def set_callback(self, callback):
         self._callback = callback

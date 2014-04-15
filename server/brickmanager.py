@@ -41,21 +41,25 @@ class SubscriptionSocket(WebSocket):
 class BrickManager(object):
     def __init__(self):
         self._connected_brick = {}
-        self._subscriptions_servers = {}
         self._subscription_clients = defaultdict(list)
         self._subscription_objects = {}
 
     def is_brick_connected(self, address):
         return address in self._connected_brick
 
-    def _is_there_a_subscription_address(self, address):
-        return address in self._subscriptions_servers
-
     def remove_old_subscription_from_brick(self, address, client):
         self._subscription_clients[address].remove(client)
 
-    def remove_brick(self, address):
-        print "brick got disconnected ", address  #todo: COMPLETE IT
+    def remove_brick(self, address):  # review: should allow for both the connected party removing it, and sudden close
+        print "brick got disconnected ", address
+        for client in self._subscription_clients[address]:
+            client.close()
+
+        self._subscription_clients[address] = []
+        del self._subscription_objects[address]
+
+        self._connected_brick[address].close()
+        del self._connected_brick[address]
 
     def add_new_subscriptions_to_brick(self, address, client):
         self._subscription_clients[address].append(client)

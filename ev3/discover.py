@@ -11,7 +11,7 @@ _LOADED_BRICKS = {}
 
 def _is_brick_already_in_memory(address, port):
     if (address, port) in _LOADED_BRICKS:
-        return _LOADED_BRICKS[(address, port)].closed
+        return not _LOADED_BRICKS[(address, port)].closed
     return False
 
 def _stored_brick(address, port):

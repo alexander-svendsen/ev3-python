@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-
 import error
 import asynchronous
 import battery
@@ -15,15 +14,16 @@ class Brick(object):
         @param communication_object: Communication object used for communicating with the brick
         @type communication_object: communication.Communication
         """
-        self._message_handler = asynchronous.MessageHandler(communication_object)
-        self._opened_ports = {}
-        self.battery = battery.Battery()
-        self.hostname = ""
-        self.refresh_battery()
         self.subscription = None
+        self._opened_ports = {}
+        self.hostname = ""
 
         self.mute = False  # blocks sound messages
         self.closed = False
+
+        self._message_handler = asynchronous.MessageHandler(communication_object)
+        self.battery = battery.Battery()
+        self.refresh_battery()
 
     def get_battery(self):
         return self.battery
