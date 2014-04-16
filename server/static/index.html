@@ -1,48 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title></title>
+    <title>Lego</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Alexander Svendsen">
+
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
 </head>
-<body>
-HELLO STUPDIO
 
-<script type='text/javascript' src="script/lib/jquery/jquery.min.js"></script>
-<script type='text/javascript' src="script/simple_jsonrpc.js"></script>
-<script>
-    jsonrpc('jsonrpc', 'add_brick', '10.0.1.1').done(function(response){
-        console.log(response);
-    });  //review: test fail
-
-    if("WebSocket" in window){
-        console.log("IT SHOULD WORK");
-    }else{
-        console.log("you don't have web sockets");
-    }
-
-
-    var socket = new WebSocket("ws://127.0.1.1:9999/");
-    socket.onopen = function(){
-        console.log("Socket has been opened!");
-        socket.send('10.0.1.1');
-    };
-    socket.onmessage = function(msg){
-//        console.log(msg);
-        //should be in the form
-        // { port : {
-        //           sensor: color....
-        //           mode: id_mode
-        //           sample: [0.0]
-        // }}
-    };
-    socket.onerror = function(msg){
-        alert(msg);
-    };
-    socket.onclose = function(msg){
-//        alert(msg);
-    };
-
-
-
-</script>
+<body id="app">
+    <script data-main="script/main" src="script/libs/require/require.js"></script>
 </body>
 </html>

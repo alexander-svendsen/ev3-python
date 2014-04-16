@@ -9,12 +9,7 @@ var json_ajax_request = function(uri, uri_method, data) {
         dataType: 'json',
         data: JSON.stringify(data)
     };
-    return $.ajax(request, {
-        success: function(response) {
-            // e.g. filter the response
-            return response.result
-        }
-    });
+    return $.ajax(request);
 };
 
 function jsonrpc(path, method){

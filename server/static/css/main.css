@@ -1,0 +1,37 @@
+@import url("libs/bootstrap/bootstrap.min.css");
+@import url("libs/bootstrap/bootstrap-responsive.min.css");
+/*@import url("libs/gridster/jquery.gridster.min.css");*/
+
+.gridster .li{
+    background-color: #ffffff;
+}
+
+body{
+    background-color: dimgrey;
+}
+
+.navbar .container{
+    padding-left: 5px;
+}
+
+.gridster{
+    width: 960px;
+    margin: 0 auto;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.gridster .gs-w {
+    background-color: #ffffff;
+    border-style:solid;
+    border-width:1px;
+    border-color: dimgrey;
+}
+
+
+.header_information{
+    margin-left: 5px;
+}
+

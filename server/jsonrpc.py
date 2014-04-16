@@ -4,11 +4,11 @@ import flask
 
 def create_valid_response(response_id=None, result=None, error=None, jsonrpc_version='2.0'):
     response = {}
-    if response_id:
+    if response_id is not None:
         response['id'] = response_id
-    if error:  # always return an error
+    if error is not None:  # always return an error
         response['error'] = error
-    elif result:
+    elif result is not None:
         response['result'] = result
 
     response['jsonrpc'] = jsonrpc_version
@@ -36,6 +36,7 @@ def register_new_remote_object(path, obj, app):
             if not isinstance(result, (list, dict, str, unicode, int, float, bool)):
                 result = str(result)
 
+            print "jsonrpc -", result
             return create_valid_response(req.get('id'), result)
 
         except AttributeError as e:

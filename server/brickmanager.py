@@ -95,8 +95,10 @@ class BrickManager(object):
             try:
                 brick = ev3.connect_to_brick(address)
                 self._connected_brick[address] = brick
+                return True
             except ev3.BrickNotFoundException:
                 pass  # care
+        return False
 
     def get_bricks(self):  # review: name as well ?
         return self._connected_brick.keys()

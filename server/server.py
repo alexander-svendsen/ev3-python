@@ -15,6 +15,7 @@ import threading
 
 _brick_manager = brickmanager.BrickManager()
 app = flask.Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # todo remove in the future
 
 
 def status(code):
@@ -29,7 +30,7 @@ def index():
     return flask.redirect(flask.url_for('static', filename='index.html'))
 
 
-jsonrpc.register_new_remote_object('/jsonrpc', _brick_manager, app)
+jsonrpc.register_new_remote_object('/brick_manager', _brick_manager, app)
 
 
 def main():
