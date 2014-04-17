@@ -1,7 +1,7 @@
-<% _.each(sensors,function(sensor,key,list){ %>
-        <% var sensor_name = sensor.name; %>
-        <div class="sensor_view">
-            <%= sensor.attributes.name %>
-            <%= key %>
-        </div>
-<% }); %>
+
+<div class="sensor_view">
+    <%- sensor %>
+    <%= mode %>
+    <%= port %>
+    <%= sample %>
+</div>

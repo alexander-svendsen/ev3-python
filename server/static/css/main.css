@@ -10,10 +10,6 @@ body{
     background-color: dimgrey;
 }
 
-.navbar .container{
-    padding-left: 5px;
-}
-
 .gridster{
     width: 960px;
     margin: 0 auto;
@@ -33,5 +29,20 @@ ul {
 
 .header_information{
     margin-left: 5px;
+    margin-bottom: 60px;
 }
 
+
+.sensor_view {
+    border: solid 1px #CCC;
+    padding: 10px 10px;
+    float: left;
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+
+.sensor_view .name {
+    padding-top: 5px;
+    text-align: center;
+    font-weight: bold;
+}

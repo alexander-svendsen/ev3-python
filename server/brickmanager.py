@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
-import ev3
 import socket
 import functools
 from collections import defaultdict
-from lib.simplewebsocketserver import WebSocket, SimpleWebSocketServer
+
+import ev3
+from lib.simplewebsocketserver import WebSocket
 
 
 class SubscriptionSocket(WebSocket):
@@ -43,12 +44,14 @@ class BrickManager(object):
         self._connected_brick = {}
         self._subscription_clients = defaultdict(list)
         self._subscription_objects = {}
+        self._old_msg = defaultdict(lambda: {1: '', 2: '', 3: '', 4: ''})
 
     def is_brick_connected(self, address):
         return address in self._connected_brick
 
     def remove_old_subscription_from_brick(self, address, client):
         self._subscription_clients[address].remove(client)
+        self._old_msg.remove(client)
 
     def remove_brick(self, address):  # review: should allow for both the connected party removing it, and sudden close
         print "brick got disconnected ", address
@@ -74,16 +77,21 @@ class BrickManager(object):
     def _callback_on_samples(self, address, samples):
         for client in list(self._subscription_clients[address]):
             try:
-                data = {}
+                data = []
                 brick = self._connected_brick[address]
                 for port in ev3.SENSOR_PORTS:
                     if port in brick.get_opened_ports:
                         sensor = brick.get_opened_ports[port]
                         mode = sensor.get_selected_mode()
-                        data[port] = {'sensor': sensor.get_name(),
-                                      'mode': mode.get_name(),
-                                      'sample': samples[port - 1]}
-                client.sendMessage(json.dumps(data))
+                        msg = {'sensor': sensor.get_name(),
+                               'mode': mode.get_name(),
+                               'port': port,
+                               'sample': samples[port - 1]}
+                        if self._old_msg[client][port] != msg:
+                            data.append(msg)
+                            self._old_msg[client][port] = msg
+                if data:
+                    client.sendMessage(json.dumps(data))
             except socket.error:
                 self._subscription_clients[address].remove(client)
             except Exception as e:  # todo: remove in the future

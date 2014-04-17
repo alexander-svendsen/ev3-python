@@ -7,21 +7,19 @@ define([
     'text!templates/app.html',
     'text!templates/header.html',
     'bootstrap'
-], function($, _, Backbone, SensorCollection, template, HeaderTemplate, bootstrap){
+], function($, _, Backbone, SensorCollection, template, HeaderTemplate){
     var AppView = Backbone.View.extend({
         el: '#app',
 
         header_template : _.template(HeaderTemplate),
 
-        //Set up the bindings and such here
         initialize: function () {
             this.$el.append(this.header_template); //render header
 
             this.available_bricks = $('#available_bricks');
-
             this.collection = new SensorCollection();
-            this.collection.add({ name: "EV3UltraSonic?"});
-            this.collection.add({ name: "EV3Color"});
+            this.collection.on('add', this.add_sensor, this);
+            this.collection.on('change', this.add_sensor, this);
 
             var that = this;
             this.json_ajax_request('/brick_manager', 'get_bricks').success(
@@ -37,9 +35,17 @@ define([
             "submit #add_brick" : "add_brick"
 
         },
+        add_sensor : function(sensor){
+            console.log(sensor.toJSON().sample);
+            this.$el.append(_.template(template)(sensor.toJSON()));
+            console.log("new sensor added");
+        },
         subscribe_on_brick: function(event){
             event.preventDefault();
-            console.log("WOOO?");
+            console.log("starting subscription");
+            var address = this.available_bricks.find(':selected').text();
+            this.collection.subscribe_on_brick(address);
+
         },
         add_brick: function(event){
             event.preventDefault();

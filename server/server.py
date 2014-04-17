@@ -9,6 +9,7 @@ import brickmanager
 from behaviors import subsumption
 import startup
 import threading
+from lib.simplewebsocketserver import SimpleWebSocketServer
 
 # controller = subsumption.Controller(False)
 # brick = ev3.connect_to_brick('10.0.1.1')
@@ -35,9 +36,11 @@ jsonrpc.register_new_remote_object('/brick_manager', _brick_manager, app)
 
 def main():
     # tools.delete_tmp()  review: uncomment when done
-    startup.main()
+    brick = ev3.connect_to_brick('10.0.1.1')
+    ultrasonic = ev3.EV3ColorSensor(brick, 3)
+    _brick_manager.add_brick('10.0.1.1')
     print "Starting websocket server"
-    server = brickmanager.SimpleWebSocketServer('', 9999, functools.partial(brickmanager.SubscriptionSocket, _brick_manager))
+    server = SimpleWebSocketServer('', 9999, functools.partial(brickmanager.SubscriptionSocket, _brick_manager))
     _thread = threading.Thread(name="receive_thread", target=server.serveforever, args=())
     _thread.daemon = True
     _thread.start()
