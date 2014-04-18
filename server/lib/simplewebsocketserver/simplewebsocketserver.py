@@ -541,9 +541,8 @@ class SimpleWebSocketServer(object):
                             sock.close()
                 else:
                     client = self.connections[ready]
-                    fileno = client.client.fileno()
-
                     try:
+                        fileno = client.client.fileno()
                         client.handleData()
 
                     except Exception as n:

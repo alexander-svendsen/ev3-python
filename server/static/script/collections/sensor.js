@@ -6,10 +6,6 @@ define([
     var SensorCollection = Backbone.Collection.extend({
         model: SensorModel,
         socket: null,
-
-        initialize: function () {
-            this.initialize_websocket("ws://127.0.1.1:9999/");
-        },
         set_sensor_collection: function (sensor_list) {
             var that = this;
             _.each(sensor_list, function(sensor, key, list){
@@ -17,14 +13,18 @@ define([
             });
         },
         subscribe_on_brick: function (brick_address) {
-            //testing for the potential (but prob not) bug where the socket has yet to be opened
+            if (!this.socket){
+                this.initialize_websocket("ws://127.0.1.1:9999/");
+            }
+            var that = this;
             if (this.socket.readyState == 1){
                 this.socket.send(brick_address);
             }else{
                 this.socket.onopen = function(){
-                    socket.send(brick_address);
+                    that.socket.send(brick_address);
                 }
             }
+
         },
         initialize_websocket: function (address) {
             var that = this;
@@ -38,10 +38,17 @@ define([
             };
             this.socket.onerror = function (msg) {
                 console.log("socket got an error, it got closed");
+                that.disconnect();
             };
             this.socket.onclose = function (msg) {
                 console.log("closed the socket");
+                that.disconnect();
             };
+        },
+        disconnect: function(){
+            this.trigger('disconnect');
+            this.reset();
+            this.socket = null;
         },
         add: function (sensor_data) {
             var new_sensor = new SensorModel(sensor_data);

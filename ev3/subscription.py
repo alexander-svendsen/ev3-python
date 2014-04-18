@@ -143,8 +143,9 @@ class Subscription(object):
             _MODULE_LOGGER.exception("Something went wrong in a callback")
 
     def close(self):
+        if self.running:  # fail safe
+            self._send_subscribe("close")
         self.running = False
-        self._send_subscribe("close")
 
     def __del__(self):
         self.close()

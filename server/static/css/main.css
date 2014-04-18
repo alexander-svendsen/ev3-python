@@ -1,44 +1,25 @@
 @import url("libs/bootstrap/bootstrap.min.css");
 @import url("libs/bootstrap/bootstrap-responsive.min.css");
-/*@import url("libs/gridster/jquery.gridster.min.css");*/
-
-.gridster .li{
-    background-color: #ffffff;
-}
 
 body{
     background-color: dimgrey;
 }
 
-.gridster{
-    width: 960px;
-    margin: 0 auto;
+#header_information{
+    /*margin-left: 5px;*/
+    /*margin-bottom: 60px;*/
+    position: static;
 }
 
-ul {
-    list-style-type: none;
-}
-
-.gridster .gs-w {
-    background-color: #ffffff;
-    border-style:solid;
-    border-width:1px;
-    border-color: dimgrey;
-}
-
-
-.header_information{
-    margin-left: 5px;
-    margin-bottom: 60px;
-}
-
-
-.sensor_view {
-    border: solid 1px #CCC;
-    padding: 10px 10px;
-    float: left;
-    margin-right: 20px;
+#brick_info {;
+    width: 40%;
+    margin-left: 20px;
     margin-bottom: 20px;
+}
+
+.sample {
+    position: relative;
+    left: 40%;
 }
 
 .sensor_view .name {

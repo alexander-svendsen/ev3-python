@@ -100,7 +100,7 @@ class Brick(object):
         open_ports = self._opened_ports.keys()
         for port in open_ports:
             self._opened_ports[port].close()
-        if self.subscription:
+        if self.subscription.running:
             self.subscription.close()
 
         self._message_handler.close()
