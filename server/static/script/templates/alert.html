@@ -1,0 +1,12 @@
+<div class="alert <%- alertType %> alert-dismissable">
+    <button type="button" class="close" >&times;</button>
+    <% var messageType = '' %>
+    <%if (alertType == 'alert-success'){%>
+        <% messageType = 'Success!' %>
+    <%}else if (alertType == 'alert-warning'){%>
+        <% messageType = 'Warning!' %>
+    <%}else if (alertType == 'alert-danger'){%>
+        <% messageType = 'Error!' %>
+    <%}%>
+    <strong><%= messageType %></strong> <%= msg %>
+</div>

@@ -3,9 +3,21 @@
 
 body{
     background-color: dimgrey;
+    position: relative;
+    margin: 0;
+    padding: 0;
 }
 
-#header_information{
+.alert{
+   position: absolute;
+   width: 600px;
+   top: 60px;
+   left: 50%;
+   margin-left: -300px;
+}
+
+#headerInformation {
+    padding-left: 5px;
     position: static;
 }
 

@@ -5,9 +5,9 @@ define([
     'collections/sensor',
     'views/brickview',
     'views/sensorview',
+    'views/alertview',
     'text!templates/header.html',
-    'bootstrap'  // to allow for the responsive design, we do not directly use it ourselves
-], function ($, _, BaseView, SensorCollection, BrickView, SensorView, HeaderTemplate) {
+], function ($, _, BaseView, SensorCollection, BrickView, SensorView, AlertView, HeaderTemplate) {
     var AppView = BaseView.extend({
         el: '#app',
         headerTemplate: _.template(HeaderTemplate),
@@ -15,6 +15,7 @@ define([
         initialize: function () {
             this.brickInfo = $('#brick');
             this.oldAddress = '';
+            this.alertView = new AlertView();
 
             this.collection = new SensorCollection();
             this.collection.on('add', this.addSensor, this);
@@ -47,12 +48,13 @@ define([
                 if (this.oldAddress != '') {
                     this.closeConnection();
                 }
-
                 this.oldAddress = address;
+
                 this.brickView = new BrickView();
                 this.brickInfo.prepend(this.brickView.render().el);
                 this.brickView.bind('close', this.closeConnection, this);
 
+                this.$el.append(this.alertView.renderSuccess('Connected').el);
                 this.collection.connectToServer(address);
             }
         },
@@ -63,9 +65,9 @@ define([
                 function (response) {
                     if (response.result == true) {
                         that.addToSelector(address);
+                        that.$el.append(this.alertView.renderSuccess('Brick added').el);
                     }
-                }
-            )
+                })
         },
         addToSelector: function (address) {
             $('#availableBricks').append(new Option(address, address));
@@ -76,6 +78,7 @@ define([
         },
         disconnect: function () {
             this.brickView.remove();
+            this.$el.append(this.alertView.renderError('Server got disconnected').el);
         }
     });
 
