@@ -1,14 +1,14 @@
 define([
     'jquery',
     'underscore',
-    'backbone',
+    'views/baseview',
     'collections/sensor',
+    'views/brickview',
     'views/sensorview',
     'text!templates/header.html',
-    'text!templates/brick_controller.html',
     'bootstrap'
-], function ($, _, Backbone, SensorCollection, SensorView, HeaderTemplate, BrickControllerTemplate) {
-    var AppView = Backbone.View.extend({
+], function ($, _, BaseView, SensorCollection, BrickView, SensorView, HeaderTemplate) {
+    var AppView = BaseView.extend({
         el: '#app',
         header_template: _.template(HeaderTemplate),
         initialize: function () {
@@ -19,7 +19,7 @@ define([
             this.available_bricks = $('#available_bricks');
             this.collection = new SensorCollection();
             this.collection.on('add', this.add_sensor, this);
-//            this.collection.on('disconnect', this.diconnect, this);
+            this.collection.on('serverDisconnected', this.disconnect, this);
 
             var that = this;
             this.json_ajax_request('/brick_manager', 'get_bricks').success(
@@ -32,8 +32,7 @@ define([
         },
         events: {
             "submit #connect_form": "subscribe_on_brick",
-            "submit #add_brick": "add_brick",
-            "click #disconnect": "disconnect"
+            "submit #add_brick": "add_brick"
         },
         add_sensor: function (sensor) {
             var view = new SensorView({model: sensor});
@@ -43,8 +42,15 @@ define([
             event.preventDefault();
             var address = this.available_bricks.find(':selected').text();
             if (address != this.old_address) {
+                if (this.old_address != ''){
+                    this.close_socket();
+                }
+
                 this.old_address = address;
-                this.brick_info.prepend(_.template(BrickControllerTemplate));
+                this.brickView = new BrickView();
+                this.brick_info.prepend(this.brickView.render().el);
+                this.brickView.bind('disconnect', this.close_socket, this);
+
                 this.collection.subscribe_on_brick(address);
             }
         },
@@ -63,31 +69,12 @@ define([
         add_to_selector: function (address) {
             this.available_bricks.append(new Option(address, address));
         },
-        diconnect: function () {
-            console.log("CALLLED DISCONNECT");
+        close_socket: function (){
+            this.old_address = '';
             this.collection.disconnect();
-            return this;
         },
-        json_ajax_request: function (object, method) {
-            var args = [].slice.apply(arguments);
-            args = args.slice(2);
-
-            var data = {
-                'method': method,
-                'params': args,
-                'id': 1
-            };
-
-            var request = {
-                url: object,
-                type: 'POST',
-                contentType: "application/json",
-                accepts: "application/json",
-                cache: false,
-                dataType: 'json',
-                data: JSON.stringify(data)
-            };
-            return $.ajax(request);
+        disconnect: function(){
+            this.brickView.remove();
         }
     });
 
