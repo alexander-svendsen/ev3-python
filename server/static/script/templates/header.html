@@ -10,14 +10,14 @@
             <a class="navbar-brand" href="#">EV3</a>
         </div>
         <div class="collapse navbar-collapse">
-            <form id="connectForm" class="navbar-form navbar-left">
+            <div class="navbar-form navbar-left">
                 <select id="availableBricks" class="form-control"></select>
-                <button type="submit" class="btn btn-success">Connect!</button>
-            </form>
-            <form id="addBrickForm" class="navbar-form navbar-left" role="search">
-                <input id="address_input" type="text" class="form-control" placeholder="brick address">
-                <button type="submit" class="btn btn-default">Add brick</button>
-            </form>
+                <button id="connectButton" class="btn btn-success">Connect!</button>
+            </div>
+            <div class="navbar-form navbar-left" role="search">
+                <input id="addressInput" type="text" class="form-control" placeholder="brick address">
+                <button id="addBrickButton" class="btn btn-default">Add brick</button>
+            </div>
         </div>
         <!--/.nav-collapse -->
     </div>

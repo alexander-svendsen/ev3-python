@@ -29,20 +29,19 @@ define([
                 });
 
         },
-        render: function(){
-          this.$el.prepend(this.headerTemplate); //render header
-          return this;
+        render: function () {
+            this.$el.prepend(this.headerTemplate); //render header
+            return this;
         },
         events: {
-            "submit #connectForm": "connectToServer",
-            "submit #addBrickForm": "addBrick"
+            "click #connectButton": "connectToServer",
+            "click #addBrickButton": "addBrick"
         },
         addSensor: function (sensor) {
             var view = new SensorView({model: sensor});
             this.brickInfo.append(view.render().el);
         },
-        connectToServer: function (event) {
-            event.preventDefault();
+        connectToServer: function () {
             var address = $('#availableBricks').find(':selected').text();
             if (address != this.oldAddress) {
                 if (this.oldAddress != '') {
@@ -57,10 +56,9 @@ define([
                 this.collection.connectToServer(address);
             }
         },
-        addBrick: function (event) {
-            event.preventDefault();
+        addBrick: function () {
             var that = this;
-            var address = $('#address_input').val();
+            var address = $('#addressInput').val();
             this.jsonRPC('/brick_manager', 'add_brick', address).success(
                 function (response) {
                     if (response.result == true) {
