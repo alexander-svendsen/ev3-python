@@ -6,74 +6,77 @@ define([
     'views/brickview',
     'views/sensorview',
     'text!templates/header.html',
-    'bootstrap'
+    'bootstrap'  // to allow for the responsive design, we do not directly use it ourselves
 ], function ($, _, BaseView, SensorCollection, BrickView, SensorView, HeaderTemplate) {
     var AppView = BaseView.extend({
         el: '#app',
-        header_template: _.template(HeaderTemplate),
-        initialize: function () {
-            this.$el.prepend(this.header_template); //render header
-            this.brick_info = $('#brick_info');
-            this.old_address = '';
+        headerTemplate: _.template(HeaderTemplate),
 
-            this.available_bricks = $('#available_bricks');
+        initialize: function () {
+            this.brickInfo = $('#brick');
+            this.oldAddress = '';
+
             this.collection = new SensorCollection();
-            this.collection.on('add', this.add_sensor, this);
+            this.collection.on('add', this.addSensor, this);
             this.collection.on('serverDisconnected', this.disconnect, this);
 
             var that = this;
-            this.json_ajax_request('/brick_manager', 'get_bricks').success(
+            this.jsonRPC('/brick_manager', 'get_bricks').success(
                 function (response) {
-                    _.each(response.result, function (address, key, list) {
-                        that.add_to_selector(address);
+                    _.each(response.result, function (brickAddress) {
+                        that.addToSelector(brickAddress);
                     });
                 });
 
         },
+        render: function(){
+          this.$el.prepend(this.headerTemplate); //render header
+          return this;
+        },
         events: {
-            "submit #connect_form": "subscribe_on_brick",
-            "submit #add_brick": "add_brick"
+            "submit #connectForm": "connectToServer",
+            "submit #addBrickForm": "addBrick"
         },
-        add_sensor: function (sensor) {
+        addSensor: function (sensor) {
             var view = new SensorView({model: sensor});
-            this.brick_info.append(view.render().el);
+            this.brickInfo.append(view.render().el);
         },
-        subscribe_on_brick: function (event) {
+        connectToServer: function (event) {
             event.preventDefault();
-            var address = this.available_bricks.find(':selected').text();
-            if (address != this.old_address) {
-                if (this.old_address != ''){
-                    this.close_socket();
+            var address = $('#availableBricks').find(':selected').text();
+            if (address != this.oldAddress) {
+                if (this.oldAddress != '') {
+                    this.closeConnection();
                 }
 
-                this.old_address = address;
+                this.oldAddress = address;
                 this.brickView = new BrickView();
-                this.brick_info.prepend(this.brickView.render().el);
-                this.brickView.bind('disconnect', this.close_socket, this);
+                this.brickInfo.prepend(this.brickView.render().el);
+                this.brickView.bind('close', this.closeConnection, this);
 
-                this.collection.subscribe_on_brick(address);
+                this.collection.connectToServer(address);
             }
         },
-        add_brick: function (event) {
+        addBrick: function (event) {
             event.preventDefault();
             var that = this;
             var address = $('#address_input').val();
-            this.json_ajax_request('/brick_manager', 'add_brick', address).success(
+            this.jsonRPC('/brick_manager', 'add_brick', address).success(
                 function (response) {
                     if (response.result == true) {
-                        that.add_to_selector(address);
+                        that.addToSelector(address);
                     }
                 }
             )
         },
-        add_to_selector: function (address) {
-            this.available_bricks.append(new Option(address, address));
+        addToSelector: function (address) {
+            $('#availableBricks').append(new Option(address, address));
         },
-        close_socket: function (){
-            this.old_address = '';
+        closeConnection: function () {
+            this.oldAddress = '';
             this.collection.disconnect();
         },
-        disconnect: function(){
+        disconnect: function () {
             this.brickView.remove();
         }
     });

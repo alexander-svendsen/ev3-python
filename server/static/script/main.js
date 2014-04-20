@@ -1,5 +1,3 @@
-
-// Require.js allows us to configure shortcut alias, simplifying later usage
 require.config({
     paths: {
         jquery: 'libs/jquery/jquery.min',

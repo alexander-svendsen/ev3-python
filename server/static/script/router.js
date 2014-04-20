@@ -6,9 +6,9 @@ define([
 ], function($, _, Backbone, AppView){
     var LegoRouter = Backbone.Router.extend({
         routes: {
-            "*actions": "defaultRoute"
+            "*actions": "defaultRoute"  //no other routes yet
         },
-        appView : null  // store the views in the route as to not reinitialize them when entering the same view
+        appView : null
     });
 
     var initialize = function(){
@@ -17,8 +17,8 @@ define([
             console.log('Route:', actions);
             if (router.appView == null){
                 router.appView = new AppView();
+                router.appView.render();
             }
-            router.appView.render();
         });
         Backbone.history.start();
     };

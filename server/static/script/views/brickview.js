@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'views/baseview',
-    'text!templates/brick_controller.html'
+    'text!templates/brick.html'
 ], function ($, _, BaseView, Template) {
     var BrickView = BaseView.extend({
         template: _.template(Template),
@@ -12,14 +12,14 @@ define([
             return this;
         },
         events: {
-            "click #disconnect": "disconnect",
-            "click #new_sensor": "new_sensor"
+            "click #closeBrickButton": "close",
+            "click #openSensorButton": "openSensor"
         },
-        disconnect: function () {
-            this.trigger('disconnect');
+        close: function () {
+            this.trigger('close');
             this.remove();
         },
-        new_sensor: function () {
+        openSensor: function () {
             console.log("mordi");
         }
     });

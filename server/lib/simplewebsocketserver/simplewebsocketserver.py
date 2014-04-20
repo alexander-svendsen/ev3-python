@@ -94,13 +94,13 @@ class WebSocket(object):
         self.data = ''
 
 
-    def handleMessage(self):
+    def on_message(self):  # CHANGED: Renamed to reflect javascript method on websockets
         pass
 
-    def handleConnected(self):
+    def on_open(self):  # CHANGED: Renamed to reflect javascript method on websockets
         pass
 
-    def handleClose(self):
+    def on_close(self):  # CHANGED: Renamed to reflect javascript method on websockets
         pass
 
     def handlePacket(self):
@@ -118,7 +118,7 @@ class WebSocket(object):
 
         # data
         elif self.opcode == self.STREAM or self.opcode == self.TEXT or self.opcode == self.BINARY:
-            self.handleMessage()
+            self.on_message()
 
 
     def handleData(self):
@@ -179,7 +179,7 @@ class WebSocket(object):
                         self.headerbuffer = ''
 
                         try:
-                            self.handleConnected()
+                            self.on_open()
                         except:
                             pass
                     else:
@@ -233,7 +233,7 @@ class WebSocket(object):
         self.headerbuffer = ''
 
         try:
-            self.handleConnected()
+            self.on_open()
         except:
             pass
 
@@ -272,7 +272,7 @@ class WebSocket(object):
 
 
     #if s is a string then websocket TEXT is sent else BINARY
-    def sendMessage(self, s):
+    def send(self, s):  # CHANGED: Renamed to reflect javascript method on websockets
 
         if self.hixie76 is False:
 
@@ -512,7 +512,7 @@ class SimpleWebSocketServer(object):
 
         for conn in self.connections.itervalues():
             try:
-                conn.handleClose()
+                conn.on_close()
             except:
                 pass
 
@@ -550,7 +550,7 @@ class SimpleWebSocketServer(object):
                         # logging.debug(str(client.address) + ' ' + str(n))
 
                         try:
-                            client.handleClose()
+                            client.on_close()
                         except:
                             pass
 
@@ -568,7 +568,7 @@ class SimpleWebSocketServer(object):
                     fileno = client.client.fileno()
 
                     try:
-                        client.handleClose()
+                        client.on_close()
                     except:
                         pass
 

@@ -6,61 +6,60 @@ define([
     var SensorCollection = Backbone.Collection.extend({
         model: SensorModel,
         socket: null,
-        set_sensor_collection: function (sensor_list) {
+        setCollection: function (sensors) {
             var that = this;
-            _.each(sensor_list, function (sensor) {
+            _.each(sensors, function (sensor) {
                 that.add(sensor);
             });
         },
-        subscribe_on_brick: function (brick_address) {
+        connectToServer: function (brick_address) {
             if (!this.socket) {
-                this.initialize_websocket("ws://127.0.1.1:9999/");
+                this.initializeWebSocket("ws://127.0.1.1:9999/");
             }
-            var that = this;
             if (this.socket.readyState == 1) {
                 this.socket.send(brick_address);
             } else {
+                var that = this;
                 this.socket.onopen = function () {
                     that.socket.send(brick_address);
-                }
+                };
             }
 
         },
-        initialize_websocket: function (address) {
+        initializeWebSocket: function (address) {
             var that = this;
             this.socket = new WebSocket(address);
             this.socket.onmessage = function (msg) {
-                var json_data = $.parseJSON(msg.data);
-                that.set_sensor_collection(json_data);
+                var jsonData = $.parseJSON(msg.data);
+                that.setCollection(jsonData);
             };
-            this.socket.onclose = function (msg) {
+            this.socket.onclose = function () {
                 console.log("Socket.close");
                 that.disconnect();
                 that.trigger('serverDisconnected');
             };
         },
         disconnect: function () {
-            console.log("disconnected socket");
             if (this.socket){
                 this.socket.close();
                 this.socket = null;
             }
             this.clear(); //cannot use reset as it does not trigger any model event
         },
-        add: function (sensor_data) {
-            if (sensor_data == undefined) {
+        add: function (sensor) {
+            if (sensor == undefined) {
                 return;
             }
 
-            var new_sensor = new SensorModel(sensor_data);
+            var newSensor = new SensorModel(sensor);
             var duplicate = this.find(function (model) {
-                return model.eql(new_sensor);
+                return model.eql(newSensor);
             });
             if (duplicate) {
-                duplicate.set(new_sensor.toJSON());
+                duplicate.set(newSensor.toJSON());
             }
             else {
-                Backbone.Collection.prototype.add.call(this, new_sensor);
+                Backbone.Collection.prototype.add.call(this, newSensor);
             }
         },
         clear: function () {
@@ -70,7 +69,6 @@ define([
                 model.trigger('remove', model, that);
             });
             this._reset();
-            return this;
         }
     });
     return SensorCollection;

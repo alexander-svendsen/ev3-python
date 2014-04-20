@@ -1,8 +1,7 @@
 define([
     'underscore',
-    'backbone',
-    'jquery'
-], function (_, Backbone, $) {
+    'backbone'
+], function (_, Backbone) {
     var SensorModel = Backbone.Model.extend({
         defaults: {
             port: 0,

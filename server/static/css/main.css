@@ -6,12 +6,10 @@ body{
 }
 
 #header_information{
-    /*margin-left: 5px;*/
-    /*margin-bottom: 60px;*/
     position: static;
 }
 
-#brick_info {;
+#brick {;
     width: 40%;
     margin-left: 20px;
     margin-bottom: 20px;

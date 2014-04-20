@@ -18,7 +18,7 @@ class SubscriptionSocket(WebSocket):
         if self.sub_address:
             self.brick_manager.remove_old_subscription_from_brick(self.sub_address, self)
 
-    def handleMessage(self):
+    def on_message(self):
         brick_id = str(self.data)
 
         if self.sub_address == brick_id:  # no need to resubscribe on same brick
@@ -31,10 +31,10 @@ class SubscriptionSocket(WebSocket):
             # basically means the clients want subscribe messages to a brick not connected, so we close it
             self.close()
 
-    def handleConnected(self):
+    def on_open(self):
         print self.address, 'connected'
 
-    def handleClose(self):
+    def on_close(self):
         self.remove_from_old_subscription()
         print self.address, 'closed'
 
@@ -91,7 +91,7 @@ class BrickManager(object):
                             data.append(msg)
                             self._old_msg[client][port] = msg
                 if data:
-                    client.sendMessage(json.dumps(data))
+                    client.send(json.dumps(data))
             except socket.error:
                 self._subscription_clients[address].remove(client)
             except Exception as e:  # todo: remove in the future
