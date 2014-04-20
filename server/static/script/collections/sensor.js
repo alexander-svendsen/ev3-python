@@ -6,6 +6,8 @@ define([
     var SensorCollection = Backbone.Collection.extend({
         model: SensorModel,
         socket: null,
+        closedFromServer: false,  //to avoid a round dependency
+
         setCollection: function (sensors) {
             var that = this;
             _.each(sensors, function (sensor) {
@@ -36,14 +38,24 @@ define([
             this.socket.onclose = function () {
                 console.log("Socket.close");
                 that.disconnect();
-                that.trigger('serverDisconnected');
+                if (that.closedFromServer){
+                    that.closedFromServer = false;
+                }else{
+                    that.trigger('serverDisconnected');
+                }
             };
+
         },
-        disconnect: function () {
+        disconnect: function (silent) {
+           if (silent){
+                this.closedFromServer = true;
+            }
+
             if (this.socket){
                 this.socket.close();
                 this.socket = null;
             }
+
             this.clear(); //cannot use reset as it does not trigger any model event
         },
         add: function (sensor) {

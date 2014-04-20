@@ -54,7 +54,6 @@ define([
                 this.brickInfo.prepend(this.brickView.render().el);
                 this.brickView.bind('close', this.closeConnection, this);
 
-                this.$el.append(this.alertView.renderSuccess('Connected').el);
                 this.collection.connectToServer(address);
             }
         },
@@ -74,11 +73,11 @@ define([
         },
         closeConnection: function () {
             this.oldAddress = '';
-            this.collection.disconnect();
+            this.collection.disconnect(true);
         },
         disconnect: function () {
             this.brickView.remove();
-            this.$el.append(this.alertView.renderError('Server got disconnected').el);
+            this.$el.append(this.alertView.renderError('Server not responding').el);
         }
     });
 
