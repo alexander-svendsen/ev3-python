@@ -2,11 +2,16 @@ define([
     'jquery',
     'underscore',
     'views/baseview',
-    'text!templates/brick.html'
+    'text!templates/brick.html',
+    'bootstrap'
 ], function ($, _, BaseView, Template) {
     var BrickView = BaseView.extend({
         template: _.template(Template),
 
+        initialize: function (option) {
+            this.alertView = option.alertView;
+            this.brickAddress = option.brickAddress;
+        },
         render: function () {
             this.$el.html(this.template);
             return this;
@@ -20,7 +25,8 @@ define([
             this.remove();
         },
         openSensor: function () {
-            console.log("mordi");
+            this.jsonRPC('/brick_manager', 'open_sensor', this.brickAddress, $('#sensorName').val(), $('#portNumber').val());
+
         }
     });
     return BrickView;

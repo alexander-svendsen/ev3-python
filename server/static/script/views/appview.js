@@ -50,7 +50,7 @@ define([
                 }
                 this.oldAddress = address;
 
-                this.brickView = new BrickView();
+                this.brickView = new BrickView({brickAddress: address, alertView: this.alertView});
                 this.brickInfo.prepend(this.brickView.render().el);
                 this.brickView.bind('close', this.closeConnection, this);
 
@@ -64,7 +64,10 @@ define([
                 function (response) {
                     if (response.result == true) {
                         that.addToSelector(address);
-                        that.$el.append(this.alertView.renderSuccess('Brick added').el);
+                        that.$el.append(that.alertView.renderSuccess('Brick added').el);
+                    }
+                    else{
+                        that.$el.append(that.alertView.renderError('No brick with that address found').el);
                     }
                 })
         },
@@ -76,6 +79,7 @@ define([
             this.collection.disconnect(true);
         },
         disconnect: function () {
+            this.oldAddress = '';
             this.brickView.remove();
             this.$el.append(this.alertView.renderError('Server not responding').el);
         }

@@ -110,3 +110,15 @@ class BrickManager(object):
 
     def get_bricks(self):  # review: name as well ?
         return self._connected_brick.keys()
+
+    def open_sensor(self, brick_address, sensor_name, port):
+        if brick_address in self._connected_brick:
+            brick = self._connected_brick[brick_address]
+            sensor_class = getattr(ev3, sensor_name)
+            try:
+                # simply try to construct sensor will automatically be pushed to client afterwords
+                sensor_class(brick, int(port))
+                return True
+            except ev3.InvalidSensorPortException, ev3.SensorNotConnectedException:
+                pass
+        return False

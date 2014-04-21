@@ -75,6 +75,11 @@ class Sensor(object):
         self._brick = brick
         self._closed = False
 
+        # classes that inherit this variable should override it with the correct mode values
+        self._available_modes = self._get_modes()
+        # every sensor starts on mode 0
+        self._selected_mode = 0
+
         if not self._brick.set_port_to_used(self._sensor_port, self):
             raise InvalidSensorPortException("sensor port already in use by a different sensor")
 
@@ -85,11 +90,6 @@ class Sensor(object):
         if not response["data"]:
             raise SensorNotConnectedException("Can't open sensor")
 
-        # classes that inherit this variable should override it with the correct mode values
-        self._available_modes = self._get_modes()
-
-        # every sensor starts on mode 0
-        self._selected_mode = 0
         self.initialized = True
         self._cache_data = None
 

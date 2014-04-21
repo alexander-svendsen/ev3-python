@@ -37,7 +37,7 @@ def main():
     # tools.delete_tmp()  review: uncomment when done
     brick = ev3.connect_to_brick('10.0.1.1')
     ultrasonic = ev3.EV3UltrasonicSensor(brick, 1)
-    touch = ev3.EV3TouchSensor(brick, 4)
+    # touch = ev3.EV3TouchSensor(brick, 4)
 
     _brick_manager.add_brick('10.0.1.1')
     print "Starting websocket server"
