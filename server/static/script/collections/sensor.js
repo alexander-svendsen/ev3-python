@@ -6,7 +6,7 @@ define([
     var SensorCollection = Backbone.Collection.extend({
         model: SensorModel,
         socket: null,
-        closedFromServer: false,  //to avoid a round dependency
+        brickAddress: '',
 
         setCollection: function (sensors) {
             var that = this;
@@ -14,19 +14,15 @@ define([
                 that.add(sensor);
             });
         },
-        connectToServer: function (brick_address) {
+        connectToServer: function (brickAddress) {
+            this.brickAddress = brickAddress;
             if (!this.socket) {
                 this.initializeWebSocket("ws://127.0.1.1:9999/");
             }
-            if (this.socket.readyState == 1) {
-                this.socket.send(brick_address);
-            } else {
-                var that = this;
-                this.socket.onopen = function () {
-                    that.socket.send(brick_address);
-                };
-            }
-
+        },
+        onSocketOpen :function(){
+            this.trigger('onSocketOpen');
+            this.socket.send(this.brickAddress);
         },
         initializeWebSocket: function (address) {
             var that = this;
@@ -36,26 +32,18 @@ define([
                 that.setCollection(jsonData);
             };
             this.socket.onclose = function () {
-                console.log("Socket.close");
                 that.disconnect();
-                if (that.closedFromServer){
-                    that.closedFromServer = false;
-                }else{
-                    that.trigger('serverDisconnected');
-                }
+                that.trigger('serverDisconnected');
             };
-
+            this.socket.onopen = function () {
+                that.onSocketOpen();
+            };
         },
-        disconnect: function (silent) {
-           if (silent){
-                this.closedFromServer = true;
-            }
-
+        disconnect: function () {
             if (this.socket){
                 this.socket.close();
                 this.socket = null;
             }
-
             this.clear(); //cannot use reset as it does not trigger any model event
         },
         add: function (sensor) {

@@ -1,13 +1,20 @@
 @import url("libs/bootstrap/bootstrap.min.css");
 @import url("libs/bootstrap/bootstrap-responsive.min.css");
+@import url("libs/codemirror/codemirror.css");
 
 body{
     background-color: dimgrey;
-    position: relative;
-    margin: 0;
-    padding: 0;
 }
 
+.topBuffer{
+    padding-top: 70px;
+}
+.bufferTop{
+    margin-top: 10px;
+}
+.bufferLeft{
+    margin-left: 1px;
+}
 .alert{
    position: absolute;
    width: 600px;
@@ -16,24 +23,17 @@ body{
    margin-left: -300px;
 }
 
-#headerInformation {
-    padding-left: 5px;
-    position: static;
+#codeList input.edit {
+    display: none;
+}
+#codeList .editing label{
+    display: none;
+}
+#codeList .editing input.edit {
+    display: inline;
 }
 
-#brick {;
-    width: 40%;
-    margin-left: 20px;
-    margin-bottom: 20px;
+.codeItems{
+
 }
 
-.sample {
-    position: relative;
-    left: 40%;
-}
-
-.sensor_view .name {
-    padding-top: 5px;
-    text-align: center;
-    font-weight: bold;
-}

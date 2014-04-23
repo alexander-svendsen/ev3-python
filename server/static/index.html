@@ -1,17 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>RoboMind</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Alexander Svendsen">
     <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
 <script data-main="script/main" src="script/libs/require/require.js"></script>
 <div id="app">
-    <!--everything will be rendered here-->
-    <div id='brick'>
-        <!--brick info will go here-->
+    <!--Header should always be here-->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">EV3</a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <div class="navbar-form navbar-left">
+                    <select id="availableBricks" class="form-control"></select>
+                    <button id="connectButton" class="btn btn-success">Connect!</button>
+                    <button id="openSensorButton" class="btn btn-success hide" data-toggle="modal"
+                            data-target="#myModal">Open sensor
+                    </button>
+                </div>
+                <div class="navbar-form navbar-left" role="search">
+                    <input id="addressInput" type="text" class="form-control" placeholder="brick address">
+                    <button id="addBrickButton" class="btn btn-default">Add brick</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Model-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Open Sensor</h4>
+                </div>
+                <div class="modal-body form-group">
+                    <input id="sensorName" type="text" class="form-control" placeholder="Sensor name"> <br>
+                    <input id="portNumber" type="number" min="1" max="4" class="form-control" placeholder="Port number">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="openSensorButton" type="button" class="btn btn-primary" data-dismiss="modal">Open
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Main container-->
+    <div class="container topBuffer">
+        <div id='brick' class="col-md-6"></div>
+        <div id='codeView' class="col-md-6 row bufferLeft"></div>
     </div>
 </div>
 </body>

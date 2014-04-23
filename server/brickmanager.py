@@ -119,6 +119,6 @@ class BrickManager(object):
                 # simply try to construct sensor will automatically be pushed to client afterwords
                 sensor_class(brick, int(port))
                 return True
-            except ev3.InvalidSensorPortException, ev3.SensorNotConnectedException:
+            except (ev3.InvalidSensorPortException, ev3.SensorNotConnectedException):
                 pass
         return False

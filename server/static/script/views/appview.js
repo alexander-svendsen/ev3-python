@@ -3,23 +3,23 @@ define([
     'underscore',
     'views/baseview',
     'collections/sensor',
-    'views/brickview',
     'views/sensorview',
     'views/alertview',
-    'text!templates/header.html',
-], function ($, _, BaseView, SensorCollection, BrickView, SensorView, AlertView, HeaderTemplate) {
+    'views/codelistview',
+    'bootstrap'
+], function ($, _, BaseView, SensorCollection, SensorView, AlertView, CodeListView) {
     var AppView = BaseView.extend({
         el: '#app',
-        headerTemplate: _.template(HeaderTemplate),
+        connected: false,
 
         initialize: function () {
             this.brickInfo = $('#brick');
-            this.oldAddress = '';
             this.alertView = new AlertView();
 
             this.collection = new SensorCollection();
             this.collection.on('add', this.addSensor, this);
             this.collection.on('serverDisconnected', this.disconnect, this);
+            this.collection.on('onSocketOpen', this.renderConnectedProperly, this);
 
             var that = this;
             this.jsonRPC('/brick_manager', 'get_bricks').success(
@@ -28,7 +28,6 @@ define([
                         that.addToSelector(brickAddress);
                     });
                 });
-
         },
         render: function () {
             this.$el.prepend(this.headerTemplate); //render header
@@ -36,7 +35,12 @@ define([
         },
         events: {
             "click #connectButton": "connectToServer",
-            "click #addBrickButton": "addBrick"
+            "click #addBrickButton": "addBrick",
+            "click #openSensorButton": "openSensor"
+        },
+        openSensor: function () {
+            this.jsonRPC('/brick_manager', 'open_sensor',
+                this.brickAddress, $('#sensorName').val().trim(), $('#portNumber').val().trim());
         },
         addSensor: function (sensor) {
             var view = new SensorView({model: sensor});
@@ -44,29 +48,31 @@ define([
         },
         connectToServer: function () {
             var address = $('#availableBricks').find(':selected').text();
-            if (address != this.oldAddress) {
-                if (this.oldAddress != '') {
-                    this.closeConnection();
-                }
-                this.oldAddress = address;
 
-                this.brickView = new BrickView({brickAddress: address, alertView: this.alertView});
-                this.brickInfo.prepend(this.brickView.render().el);
-                this.brickView.bind('close', this.closeConnection, this);
-
+            if (this.connected) {
+                this.collection.disconnect(true);
+            }
+            else{
                 this.collection.connectToServer(address);
             }
         },
+        renderConnectedProperly: function(){
+            $('#connectButton').html('Disconnect!').addClass('btn-danger');
+            $('#openSensorButton').removeClass('hide');
+            this.codeView = new CodeListView();
+            $(this.codeView.render().el).appendTo('#codeView');
+            this.connected = true;
+        },
         addBrick: function () {
             var that = this;
-            var address = $('#addressInput').val();
+            var address = $('#addressInput').val().trim();
             this.jsonRPC('/brick_manager', 'add_brick', address).success(
                 function (response) {
                     if (response.result == true) {
                         that.addToSelector(address);
                         that.$el.append(that.alertView.renderSuccess('Brick added').el);
                     }
-                    else{
+                    else {
                         that.$el.append(that.alertView.renderError('No brick with that address found').el);
                     }
                 })
@@ -74,16 +80,12 @@ define([
         addToSelector: function (address) {
             $('#availableBricks').append(new Option(address, address));
         },
-        closeConnection: function () {
-            this.oldAddress = '';
-            this.collection.disconnect(true);
-        },
         disconnect: function () {
-            this.oldAddress = '';
-            this.brickView.remove();
-            this.$el.append(this.alertView.renderError('Server not responding').el);
+            this.codeView.remove();
+            $('#connectButton').html('Connect!').removeClass('btn-danger');
+            $('#openSensorButton').addClass('hide');
+            this.connected = false;
         }
     });
-
     return AppView;
 });
