@@ -3,15 +3,11 @@ import functools
 import ev3
 import flask
 import sys
-import tools
 import jsonrpc
 import brickmanager
-from behaviors import subsumption
 import threading
 from lib.simplewebsocketserver import SimpleWebSocketServer
 
-# controller = subsumption.Controller(False)
-# brick = ev3.connect_to_brick('10.0.1.1')
 
 _brick_manager = brickmanager.BrickManager()
 app = flask.Flask(__name__)

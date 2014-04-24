@@ -2,7 +2,9 @@
 import json
 import socket
 import functools
+import threading
 from collections import defaultdict
+from behaviors import subsumption
 
 import ev3
 from lib.simplewebsocketserver import WebSocket
@@ -13,6 +15,7 @@ class SubscriptionSocket(WebSocket):
         super(SubscriptionSocket, self).__init__(server, sock, address)
         self.brick_manager = brick_manager
         self.sub_address = None
+        self._send_lock = threading.Lock()
 
     def remove_from_old_subscription(self):
         if self.sub_address:
@@ -38,9 +41,14 @@ class SubscriptionSocket(WebSocket):
         self.remove_from_old_subscription()
         print self.address, 'closed'
 
+    def send(self, msg):  # wrapper to ensure that only one message is sent at a time
+        with self._send_lock:
+            super(SubscriptionSocket, self).send(msg)
+
 
 class BrickManager(object):
     def __init__(self):
+        self.controller = subsumption.Controller(return_when_no_action=False)
         self._connected_brick = {}
         self._subscription_clients = defaultdict(list)
         self._subscription_objects = {}
@@ -53,7 +61,7 @@ class BrickManager(object):
         self._subscription_clients[address].remove(client)
         self._old_msg.remove(client)
 
-    def remove_brick(self, address):  # review: should allow for both the connected party removing it, and sudden close
+    def remove_brick(self, address):
         print "brick got disconnected ", address
         for client in self._subscription_clients[address]:
             client.close()
@@ -91,7 +99,7 @@ class BrickManager(object):
                             data.append(msg)
                             self._old_msg[client][port] = msg
                 if data:
-                    client.send(json.dumps(data))
+                    client.send(json.dumps({'cmd': 'sensor_data', 'data': data}))
             except socket.error:
                 self._subscription_clients[address].remove(client)
             except Exception as e:  # todo: remove in the future

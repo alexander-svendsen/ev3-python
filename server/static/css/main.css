@@ -5,7 +5,6 @@
 body{
     background-color: dimgrey;
 }
-
 .topBuffer{
     padding-top: 70px;
 }
@@ -22,7 +21,6 @@ body{
    left: 50%;
    margin-left: -300px;
 }
-
 #codeList input.edit {
     display: none;
 }
@@ -31,4 +29,7 @@ body{
 }
 #codeList .editing input.edit {
     display: inline;
+}
+#app{
+    min-width: 400px;
 }

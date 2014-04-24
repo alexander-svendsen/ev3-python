@@ -105,13 +105,14 @@ class Controller():
         Starts finding and running behaviors, suppressing the old behaviors when new behaviors with higher priority
         wants to run.
         """
-        self._find_and_set_new_active_behavior()  # force do it ourselves once to find the right onne
+        self._running = True
+        self._find_and_set_new_active_behavior()  # force do it ourselves once to find the right one
         thread = threading.Thread(name="Continuous behavior checker",
-                                  target=self._continues_find_new_active_behavior, args=())
+                                  target=self._continuously_find_new_active_behavior, args=())
         thread.daemon = True
         thread.start()
 
-        while True:
+        while self._running:
             if self._active_behavior is not None:
                 self.behaviors[self._active_behavior].action()
                 self._active_behavior = None
@@ -121,6 +122,19 @@ class Controller():
         #Nothing more to do, so we are shutting down
         self._running = False
 
-    def _continues_find_new_active_behavior(self):
+    def run(self):
+        thread = threading.Thread(name="Run the controller",
+                                  target=self.start, args=())
+        thread.daemon = True
+        thread.start()
+
+    def stop(self):
+        self._running = False
+        self.behaviors = []
+
+    def pause(self):
+        self._running = False
+
+    def _continuously_find_new_active_behavior(self):
         while self._running:
             self._find_and_set_new_active_behavior()

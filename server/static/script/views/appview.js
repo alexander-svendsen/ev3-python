@@ -55,7 +55,7 @@ define([
             $('#availableBricks').append(new Option(address, address));
         },
         connectOrDisconnect: function () {
-            this.brickAddress = $('#availableBricks').find(':selected').text();
+            this.brickAddress = $('#availableBricks').get(0).value;
             if (this.connected) {
                 this.socket.closeConnection(true);
                 this.onClose();
@@ -66,7 +66,12 @@ define([
         },
         onMessage: function (message) {
             var jsonData = $.parseJSON(message.data);
-            this.sensorView.addMultiple(jsonData)
+            if (jsonData['cmd'] == 'sensor_data'){
+                this.sensorView.addMultiple(jsonData['data'])
+            }
+            else{
+                console.log("strange data");
+            }
         },
         onOpen: function () {
             //Firstly send what brick we are interested in
