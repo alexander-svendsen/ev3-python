@@ -10,7 +10,7 @@ define([
 
         initialize: function (option) {
             this.model.on('change', this.render, this);
-            this.model.on('destroy', this.remove, this);
+            this.model.on('destroy', this.close, this);
             this.codeMirror = option.codeMirror;
         },
 
@@ -58,8 +58,18 @@ define([
         activateView: function(){
             this.$el.addClass('active');
         },
-        deactiveView: function(){
-            this.$el.removeClass('active')
+        deactivateView: function(){
+            if (this.$el){ //just in case it got removed
+                this.$el.removeClass('active')
+            }
+        },
+        close: function () {  //removes the zombies
+            this.unbind();
+            this.model.unbind('change', this.render, this);
+            this.model.unbind('destroy', this.close, this);
+            this.remove();
+            delete this.$el;
+            delete this.el;
         }
     });
     return CodeView

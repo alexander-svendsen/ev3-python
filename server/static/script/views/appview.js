@@ -57,7 +57,7 @@ define([
             }
         },
         renderConnectedProperly: function(){
-            $('#connectButton').html('Disconnect!').addClass('btn-danger');
+            $('#connectButton').html('Disconnect!').addClass('btn-danger').blur();
             $('#openSensorButton').removeClass('hide');
             this.codeView = new CodeListView();
             $(this.codeView.render().el).appendTo('#codeView');
@@ -81,8 +81,8 @@ define([
             $('#availableBricks').append(new Option(address, address));
         },
         disconnect: function () {
-            this.codeView.remove();
-            $('#connectButton').html('Connect!').removeClass('btn-danger');
+            this.codeView.close();
+            $('#connectButton').html('Connect!').removeClass('btn-danger').blur();
             $('#openSensorButton').addClass('hide');
             this.connected = false;
         }

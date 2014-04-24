@@ -63,7 +63,7 @@ define([
         },
         switchSelectedView: function (view) {
             if (this.selectedView) {
-                this.selectedView.deactiveView();
+                this.selectedView.deactivateView();
                 this.saveCodeToModule();
             }
             this.selectedView = view;
@@ -102,6 +102,17 @@ define([
             if (this.selectedView.model == model) {
                 this.codeMirror.setValue('# code should go here');
             }
+        },
+        close: function () {
+
+            this.unbind();
+            this.collection.unbind('add', this.add, this);
+            this.collection.unbind('reset', this.reset, this);
+            this.collection.unbind('remove', this.fixProperViewAfterRemove, this);
+
+            this.remove();
+            delete this.$el; // Delete the jQuery wrapped object variable
+            delete this.el; // Delete the variable reference to this node
         }
 
     });
