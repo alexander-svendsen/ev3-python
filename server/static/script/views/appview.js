@@ -2,24 +2,23 @@ define([
     'jquery',
     'underscore',
     'views/baseview',
-    'collections/sensor',
-    'views/sensorview',
     'views/alertview',
+    'views/sensorlistview',
     'views/codelistview',
+    'views/socketview',
     'bootstrap'
-], function ($, _, BaseView, SensorCollection, SensorView, AlertView, CodeListView) {
+], function ($, _, BaseView, AlertView, SensorListView, CodeListView, SocketView) {
     var AppView = BaseView.extend({
         el: '#app',
         connected: false,
 
         initialize: function () {
-            this.brickInfo = $('#brick');
             this.alertView = new AlertView();
+            this.socket = new SocketView();
 
-            this.collection = new SensorCollection();
-            this.collection.on('add', this.addSensor, this);
-            this.collection.on('serverDisconnected', this.disconnect, this);
-            this.collection.on('onSocketOpen', this.renderConnectedProperly, this);
+            this.socket.bind('onopen', this.onOpen, this);
+            this.socket.bind('onclose', this.onClose, this);
+            this.socket.bind('onmessage', this.onMessage, this);
 
             var that = this;
             this.jsonRPC('/brick_manager', 'get_bricks').success(
@@ -29,39 +28,14 @@ define([
                     });
                 });
         },
-        render: function () {
-            this.$el.prepend(this.headerTemplate); //render header
-            return this;
-        },
         events: {
-            "click #connectButton": "connectToServer",
+            "click #connectButton": "connectOrDisconnect",
             "click #addBrickButton": "addBrick",
             "click #openSensorButton": "openSensor"
         },
         openSensor: function () {
             this.jsonRPC('/brick_manager', 'open_sensor',
                 this.brickAddress, $('#sensorName').val().trim(), $('#portNumber').val().trim());
-        },
-        addSensor: function (sensor) {
-            var view = new SensorView({model: sensor});
-            this.brickInfo.append(view.render().el);
-        },
-        connectToServer: function () {
-            var address = $('#availableBricks').find(':selected').text();
-
-            if (this.connected) {
-                this.collection.disconnect(true);
-            }
-            else{
-                this.collection.connectToServer(address);
-            }
-        },
-        renderConnectedProperly: function(){
-            $('#connectButton').html('Disconnect!').addClass('btn-danger').blur();
-            $('#openSensorButton').removeClass('hide');
-            this.codeView = new CodeListView();
-            $(this.codeView.render().el).appendTo('#codeView');
-            this.connected = true;
         },
         addBrick: function () {
             var that = this;
@@ -80,8 +54,36 @@ define([
         addToSelector: function (address) {
             $('#availableBricks').append(new Option(address, address));
         },
-        disconnect: function () {
+        connectOrDisconnect: function () {
+            this.brickAddress = $('#availableBricks').find(':selected').text();
+            if (this.connected) {
+                this.socket.close();
+            }
+            else {
+                this.socket.open();
+            }
+        },
+        onMessage: function(message){
+            var jsonData = $.parseJSON(message.data);
+            this.sensorView.addMultiple(jsonData)
+        },
+        onOpen: function () {
+            //Firstly send what brick we are interested in
+            this.socket.send(this.brickAddress);
+
+            //Fix the view
+            $('#connectButton').html('Disconnect!').addClass('btn-danger').blur();
+            $('#openSensorButton').removeClass('hide');
+
+            this.sensorView = new SensorListView();
+            this.codeView = new CodeListView();
+            $(this.sensorView.render().el).appendTo('#brick');
+            $(this.codeView.render().el).appendTo('#codeView');
+            this.connected = true;
+        },
+        onClose: function () {
             this.codeView.close();
+            this.sensorView.close();
             $('#connectButton').html('Connect!').removeClass('btn-danger').blur();
             $('#openSensorButton').addClass('hide');
             this.connected = false;

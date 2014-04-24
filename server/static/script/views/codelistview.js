@@ -50,14 +50,13 @@ define([
                     '\n\tdef suppress(self):' +
                     '\n\t\tpass'
             };
-
             this.collection.add(data);
             this.input.val('');
         },
         add: function (codeModule) {
             var view = new CodeView({model: codeModule, codeMirror: this.codeMirror});
-            $('#codeList').append(view.render().el);
-            $('#editorWithButtons').removeClass('hide');
+            this.$('#codeList').append(view.render().el);
+            this.$('#editorWithButtons').removeClass('hide');
             view.bind('selected', this.switchSelectedView, this);
             view.viewCode();
         },
@@ -70,7 +69,7 @@ define([
             this.selectedView.activateView();
         },
         reset: function () {
-            $('#codeList').html('');
+            this.$('#codeList').html('');
             this.collection.each(this.add(), this);
         },
         createEditor: function () {
@@ -95,7 +94,7 @@ define([
         },
         fixProperViewAfterRemove: function (model) {
             if (this.collection.length == 0) {
-                $('#editorWithButtons').addClass('hide');
+                this.$('#editorWithButtons').addClass('hide');
                 return;
             }
 
@@ -111,8 +110,8 @@ define([
             this.collection.unbind('remove', this.fixProperViewAfterRemove, this);
 
             this.remove();
-            delete this.$el; // Delete the jQuery wrapped object variable
-            delete this.el; // Delete the variable reference to this node
+            delete this.$el;
+            delete this.el;
         }
 
     });
