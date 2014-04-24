@@ -17,7 +17,7 @@ define([
             this.socket = new SocketView();
 
             this.socket.bind('onopen', this.onOpen, this);
-            this.socket.bind('onclose', this.onClose, this);
+            this.socket.bind('onclose', this.onUnexpectedClose, this);
             this.socket.bind('onmessage', this.onMessage, this);
 
             var that = this;
@@ -57,13 +57,14 @@ define([
         connectOrDisconnect: function () {
             this.brickAddress = $('#availableBricks').find(':selected').text();
             if (this.connected) {
-                this.socket.close();
+                this.socket.closeConnection(true);
+                this.onClose();
             }
             else {
-                this.socket.open();
+                this.socket.openConnection();
             }
         },
-        onMessage: function(message){
+        onMessage: function (message) {
             var jsonData = $.parseJSON(message.data);
             this.sensorView.addMultiple(jsonData)
         },
@@ -80,6 +81,10 @@ define([
             $(this.sensorView.render().el).appendTo('#brick');
             $(this.codeView.render().el).appendTo('#codeView');
             this.connected = true;
+        },
+        onUnexpectedClose: function () {
+            this.$el.append(this.alertView.renderError("Can't connect to server").el);
+            this.onClose();
         },
         onClose: function () {
             this.codeView.close();

@@ -26,7 +26,7 @@ define([
         onmessage: function (message) {
             this.trigger('onmessage', message);
         },
-        open: function () {
+        openConnection: function () {
             var that = this;
             this.socket = new WebSocket('ws://127.0.0.1:9999/');
             this.socket.onmessage = function(message){that.onmessage(message)};
@@ -34,7 +34,7 @@ define([
             this.socket.onopen = function(){that.onopen()};
             this.socket.onerror = function(){that.onerror()};
         },
-        close: function (silent) {
+        closeConnection: function (silent) {
             this.silent = silent;
             this.socket.close();
         }

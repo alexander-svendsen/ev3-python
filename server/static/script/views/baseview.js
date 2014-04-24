@@ -24,6 +24,14 @@ define([
                 data: JSON.stringify(data)
             };
             return $.ajax(request);
+        },
+        close: function () {
+            this.unbind();
+            //should remove every bind here, as it will lead to zombie views
+
+            this.remove();
+            delete this.$el;
+            delete this.el;
         }
     });
     return BaseView;
