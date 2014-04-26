@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 import functools
-import ev3
-import flask
 import sys
+import threading
+
+import flask
+
+import ev3
 import jsonrpc
 import brickmanager
-import threading
 from lib.simplewebsocketserver import SimpleWebSocketServer
 
 
 _brick_manager = brickmanager.BrickManager()
+_subsumption_controller = brickmanager.ServerController(return_when_no_action=False)
+
 app = flask.Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # todo remove in the future
 
@@ -34,16 +38,17 @@ def main():
     brick = ev3.connect_to_brick('10.0.1.1')
     ultrasonic = ev3.EV3UltrasonicSensor(brick, 1)
     # touch = ev3.EV3TouchSensor(brick, 4)
-
     _brick_manager.add_brick('10.0.1.1')
     print "Starting websocket server"
-    server = SimpleWebSocketServer('', 9999, functools.partial(brickmanager.SubscriptionSocket, _brick_manager))
+    web_socket = functools.partial(brickmanager.SubscriptionSocket, _brick_manager, _subsumption_controller)
+    server = SimpleWebSocketServer('', 9999, web_socket)
     _thread = threading.Thread(name="receive_thread", target=server.serveforever, args=())
     _thread.daemon = True
     _thread.start()
 
     print "Starting flask main server"
     app.run(host='127.0.0.1', port=80)
+
 
 if __name__ == "__main__":
     sys.exit(main())

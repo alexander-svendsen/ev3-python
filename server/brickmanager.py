@@ -11,9 +11,10 @@ from lib.simplewebsocketserver import WebSocket
 
 
 class SubscriptionSocket(WebSocket):
-    def __init__(self, brick_manager, server, sock, address):
+    def __init__(self, brick_manager, subsumption_controller, server, sock, address):
         super(SubscriptionSocket, self).__init__(server, sock, address)
         self.brick_manager = brick_manager
+        self.subsumption_controller = subsumption_controller
         self.sub_address = None
         self._send_lock = threading.Lock()
 
@@ -46,9 +47,18 @@ class SubscriptionSocket(WebSocket):
             super(SubscriptionSocket, self).send(msg)
 
 
+class ServerController(subsumption.Controller):
+    def __init__(self, return_when_no_action):
+        subsumption.Controller.__init__(self, return_when_no_action)
+        self.behavior_names = []
+
+    def _add(self, behavior, behavior_name):
+        self.behavior_names.append(behavior_name)
+        self.add(behavior)
+
+
 class BrickManager(object):
     def __init__(self):
-        self.controller = subsumption.Controller(return_when_no_action=False)
         self._connected_brick = {}
         self._subscription_clients = defaultdict(list)
         self._subscription_objects = {}

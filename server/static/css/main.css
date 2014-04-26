@@ -29,6 +29,7 @@ body{
 }
 #codeList .editing input.edit {
     display: inline;
+    color: black;
 }
 #app{
     min-width: 400px;
