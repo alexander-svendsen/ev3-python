@@ -21,16 +21,6 @@ body{
    left: 50%;
    margin-left: -300px;
 }
-#codeList input.edit {
-    display: none;
-}
-#codeList .editing label{
-    display: none;
-}
-#codeList .editing input.edit {
-    display: inline;
-    color: black;
-}
 #app{
     min-width: 400px;
 }

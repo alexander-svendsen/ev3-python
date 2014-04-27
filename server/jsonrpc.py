@@ -15,7 +15,7 @@ def create_valid_response(response_id=None, result=None, error=None, jsonrpc_ver
     return flask.jsonify(response)
 
 
-def register_new_remote_object(path, obj, app):
+def register_remote_object(path, obj, app):
 
     @app.route(path, methods=['POST'])
     def jsonrpc(**kwargs):

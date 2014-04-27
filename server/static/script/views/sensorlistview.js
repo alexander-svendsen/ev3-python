@@ -6,8 +6,8 @@ define([
     'collections/sensor'
 ], function ($, _, BaseView, SensorView, SensorCollection) {
     var SensorListView = BaseView.extend({
-        collection: new SensorCollection(),
         initialize: function () {
+            this.collection = new SensorCollection();
             this.collection.on('add', this.add, this);
         },
         add: function (sensor) {

@@ -66,23 +66,30 @@ define([
         },
         onMessage: function (message) {
             var jsonData = $.parseJSON(message.data);
-            if (jsonData['cmd'] == 'sensor_data'){
-                this.sensorView.addMultiple(jsonData['data'])
+            if (jsonData['cmd'] == 'sensor_data') {
+                this.sensorView.addMultiple(jsonData['data']);
             }
-            else{
+            else if (jsonData['cmd'] == 'code_data') {
+                this.codeView.addMultiple(jsonData['data']);
+            }
+            else {
                 console.log("strange data");
             }
         },
         onOpen: function () {
             //Firstly send what brick we are interested in
-            this.socket.send(this.brickAddress);
+            var data = {
+                cmd: 'subscribe',
+                brick_address: this.brickAddress
+            };
+            this.socket.send(JSON.stringify(data));
 
             //Fix the view
             $('#connectButton').html('Disconnect!').addClass('btn-danger').blur();
             $('#openSensorButton').removeClass('hide');
 
             this.sensorView = new SensorListView();
-            this.codeView = new CodeListView();
+            this.codeView = new CodeListView({socket: this.socket});
             $(this.sensorView.render().el).appendTo('#brick');
             $(this.codeView.render().el).appendTo('#codeView');
             this.connected = true;

@@ -11,6 +11,7 @@ define([
         initialize: function (option) {
             this.model.on('change', this.render, this);
             this.model.on('destroy', this.close, this);
+            this.model.on('select', this.viewCode, this);
             this.codeMirror = option.codeMirror;
         },
 
@@ -27,30 +28,11 @@ define([
         },
         events: {
             'click' : 'viewCode',
-            'dblclick': 'editTitle',
-            'blur .edit': 'closeEditOnTitle',
-            'click .close': 'removeCodeModule',
-            'keypress .edit': 'closeEditOnTitleOnKeyPress'
+            'click .close': 'removeCodeModule'
         },
         viewCode: function(){
             this.trigger('selected', this);
             this.codeMirror.setValue(this.model.get('code'));
-        },
-        editTitle: function () {
-            this.$el.addClass('editing');
-            this.input.focus();
-        },
-        closeEditOnTitle: function () {
-            var value = this.input.val().trim();
-            if (value) {
-                this.model.set({title: value});
-            }
-            this.$el.removeClass('editing');
-        },
-        closeEditOnTitleOnKeyPress: function(event){
-            if (event.keyCode == 13){
-                this.closeEditOnTitle();
-            }
         },
         removeCodeModule: function () {
             this.model.destroy();
@@ -67,6 +49,7 @@ define([
             this.unbind();
             this.model.unbind('change', this.render, this);
             this.model.unbind('destroy', this.close, this);
+            this.model.unbind('select', this.viewCode, this);
             this.remove();
             delete this.$el;
             delete this.el;
