@@ -72,6 +72,12 @@ define([
             else if (jsonData['cmd'] == 'code_data') {
                 this.codeView.addMultiple(jsonData['data']);
             }
+            else if (jsonData['cmd'] == 'remove_code') {
+                this.codeView.removeOne(jsonData['title'])
+            }
+            else if(jsonData['cmd'] == 'running'){
+                this.codeView.newRunning(jsonData['title']);
+            }
             else {
                 console.log("strange data");
             }

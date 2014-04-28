@@ -16,8 +16,9 @@ define([
             this.collection = new CodeCollection();
             this.collection.on('add', this.add, this);
             this.collection.on('reset', this.reset, this);
-            this.collection.on('remove', this.fixProperViewAfterRemove, this);
-            this.socket = option.socket
+            this.collection.on('remove', this.removeModel, this);
+            this.socket = option.socket;
+            this.running = null;
         },
         render: function () {
             this.$el.html(this.template);
@@ -27,27 +28,40 @@ define([
         },
         events: {
             'submit form': 'createCodeSnippet',
-            'click #save': 'saveCodeToModule',
+            'click #save': 'saveAllCodeToServer',
             'click #run': 'runCode',
             'click #stop': 'stopCode',
             'click #pause': 'pauseCode'
         },
         runCode: function () {
-            //TODO
+            this.saveAllCodeToServer();
+            this.socket.send(JSON.stringify({cmd: 'run'}));
         },
         stopCode: function () {
-            //TODO
+            this.socket.send(JSON.stringify({cmd: 'stop'}));
         },
         pauseCode: function () {
-            //TODO
+            this.socket.send(JSON.stringify({cmd: 'pause'}));
         },
-        saveCodeToModule: function () {
+        saveAllCodeToServer: function () {
             if (this.selectedView) {
                 this.saveCodeInView();
-                var data = this.selectedView.model.toJSON();
-                data['cmd'] = 'code';
+            }
+            var list = [];
+            this.collection.forEach(function (code) {
+                if (code.hasChanged()) {
+                    list.push(code.toJSON());
+                }
+            });
+            if (list.length) {
+                var data = {cmd: 'bulk_code', 'data': list};
                 this.socket.send(JSON.stringify(data));
             }
+        },
+        saveCodeToServer: function (code) {
+            var data = code.toJSON();
+            data['cmd'] = 'code';
+            this.socket.send(JSON.stringify(data));
         },
         saveCodeInView: function () {
             this.selectedView.model.set({code: this.codeMirror.getValue()});
@@ -76,6 +90,8 @@ define([
                     '\n\t\tpass'
             };
             this.collection.add(data);
+            data['cmd'] = 'code';
+            this.socket.send(JSON.stringify(data));
             this.input.val('');
         },
         add: function (codeModule) {
@@ -88,13 +104,23 @@ define([
         addMultiple: function (codeList) {
             var that = this;
             _.each(codeList, function (code) {
-                that.collection.add(code);
+                var added = that.collection.add(code);
+                if (added.running) {
+                    that.running = added;
+                }
             });
+        },
+        removeOne: function (title) {
+            var model = this.collection.findWhere({title: title});
+            this.collection.remove(model, {silent: true}); //to avoid to cale the remove event
+            model.destroy();
+            this.fixViewAfterRemove(model);
         },
         switchSelectedView: function (view) {
             if (this.selectedView) {
                 this.selectedView.deactivateView();
-                this.saveCodeInView()
+                this.saveCodeInView();
+                this.selectedView.selected = false;
             }
             this.selectedView = view;
             this.selectedView.activateView();
@@ -103,11 +129,18 @@ define([
             this.$('#codeList').html('');
             this.collection.each(this.add(), this);
         },
+        newRunning: function (title) {
+            var newRunning = this.collection.findWhere({title: title});
+            if (this.running) {
+                this.running.set({running: false});
+            }
+            newRunning.set({running: true});
+            this.running = newRunning;
+        },
         createEditor: function () {
             var that = this;
             var codeMirror = CodeMirror(function (el) {
                 that.$('#codeWindow').html(el);
-
             }, {
                 lineNumbers: true,
                 mode: {name: "python",
@@ -119,28 +152,29 @@ define([
             });
 
             CodeMirror.commands.save = function () {
-                that.saveCodeToModule()
+                that.saveAllCodeToServer();
             };
             return codeMirror
         },
-        fixProperViewAfterRemove: function (model) {
+        fixViewAfterRemove: function (model) {
             if (this.collection.length == 0) {
                 this.$('#editorWithButtons').addClass('hide');
             }
             else if (this.selectedView.model == model) {
                 this.collection.models[0].trigger('select');
             }
+        },
+        removeModel: function (model) {
+            this.fixViewAfterRemove(model);
             var data = {title: model.toJSON().title, cmd: 'remove_code'};
-            console.log(this.collection);
             this.socket.send(JSON.stringify(data));
         },
         close: function () {
-
             this.unbind();
             this.collection.unbind('add', this.add, this);
             this.collection.unbind('reset', this.reset, this);
-            this.collection.unbind('remove', this.fixProperViewAfterRemove, this);
-
+            this.collection.unbind('remove', this.removeModel, this);
+            this.collection.clear();
             this.remove();
             delete this.$el;
             delete this.el;

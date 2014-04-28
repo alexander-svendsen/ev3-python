@@ -7,6 +7,9 @@ define([
             title: '',
             code: '',
             running: false
+        },
+        eql: function (other) {
+            return this.get('title') == other.get('title');
         }
     });
     return CodeModel

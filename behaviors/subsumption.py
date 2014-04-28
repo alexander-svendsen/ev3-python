@@ -59,7 +59,7 @@ class Controller():
         else:
             self.behaviors = []
         self.wait_object = threading.Event()
-        self._active_behavior_index = None
+        self.active_behavior_index = None
 
         self._running = True
         self._return_when_no_action = return_when_no_action
@@ -76,13 +76,14 @@ class Controller():
     def remove(self, index):
         old_behavior = self.behaviors[index]
         del self.behaviors[index]
-        if self._active_behavior_index == index:  # stop the old one if the new one overrides it
+        if self.active_behavior_index == index:  # stop the old one if the new one overrides it
             old_behavior.suppress()
+            self.active_behavior_index = None
 
     def update(self, behavior, index):
         old_behavior = self.behaviors[index]
         self.behaviors[index] = behavior
-        if self._active_behavior_index == index:  # stop the old one if the new one overrides it
+        if self.active_behavior_index == index:  # stop the old one if the new one overrides it
             old_behavior.suppress()
 
     def step(self):
@@ -109,10 +110,13 @@ class Controller():
 
     def _find_and_set_new_active_behavior(self):
         new_behavior_priority = self.find_next_active_behavior()
-        if self._active_behavior_index is None or self._active_behavior_index > new_behavior_priority:
-            if self._active_behavior_index is not None:
-                self.behaviors[self._active_behavior_index].suppress()
-            self._active_behavior_index = new_behavior_priority
+        if self.active_behavior_index is None or self.active_behavior_index > new_behavior_priority:
+            if self.active_behavior_index is not None:
+                self.behaviors[self.active_behavior_index].suppress()
+            self.active_behavior_index = new_behavior_priority
+
+            # Callback to tell something it changed the active behavior if anything is interested
+            self.callback(self.active_behavior_index)
 
     def _start(self):  # run the action methods
         """
@@ -127,12 +131,8 @@ class Controller():
         thread.start()
 
         while self._running:
-            if self._active_behavior_index is not None:
-                self.behaviors[self._active_behavior_index].action()
-                self._active_behavior_index = None
-
-                # Callback to tell something it changed the active behavior if anything is interested
-                self.callback(self._active_behavior_index)
+            if self.active_behavior_index is not None:
+                self.behaviors[self.active_behavior_index].action()
             elif self._return_when_no_action:
                 break
 

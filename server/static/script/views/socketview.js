@@ -28,7 +28,7 @@ define([
         },
         openConnection: function () {
             var that = this;
-            this.socket = new WebSocket('ws://127.0.0.1:9999/');
+            this.socket = new WebSocket('ws://'+ window.location.hostname +':9999/');
             this.socket.onmessage = function(message){that.onmessage(message)};
             this.socket.onclose = function(){that.onclose()};
             this.socket.onopen = function(){that.onopen()};

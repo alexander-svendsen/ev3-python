@@ -43,20 +43,33 @@ class SubscriptionSocket(WebSocket):
                     # basically means the clients want subscribe messages to a brick not connected, so we close it
                     self.close()
             elif json_data['cmd'] == 'code':
-                self.brick_manager.add_code(self.sub_address, json_data['title'], json_data['code'])
+                self.brick_manager.add_code(self.sub_address, json_data['title'], json_data['code'], self)
+            elif json_data['cmd'] == 'bulk_code':
+                self.brick_manager.add_code_bulk(self.sub_address, json_data['data'], self)
             elif json_data['cmd'] == 'remove_code':
-                self.brick_manager.remove_code(self.sub_address, json_data['title'])
+                self.brick_manager.remove_code(self.sub_address, json_data['title'], self)
+            elif json_data['cmd'] == 'run':
+                self.brick_manager.run(self.sub_address)
+            elif json_data['cmd'] == 'stop':
+                self.brick_manager.stop(self.sub_address)
+            elif json_data['cmd'] == 'pause':
+                self.brick_manager.pause(self.sub_address)
             else:
                 print "Strange json data received:", json_data
-        except (ValueError, KeyError) as e:
+        except (ValueError, KeyError):
             print "Invalid json data received:", self.data
+            print traceback.format_exc()
+        except:
             print traceback.format_exc()
 
     def on_open(self):
         print self.address, 'connected'
 
     def on_close(self):
-        self.remove_from_old_subscription()
+        try:
+            self.remove_from_old_subscription()
+        except:
+            print traceback.format_exc()
         print self.address, 'closed'
 
     def send(self, msg):  # wrapper to ensure that only one message is sent at a time
@@ -107,15 +120,13 @@ class CodeManager(object):
 
     def code_package(self):
         data = []
-        for behavior_name in self.behaviors_names_list:
+        for index, behavior_name in enumerate(self.behaviors_names_list):
             data.append({
                 'title': behavior_name,
-                'code': self.raw_code[behavior_name]
+                'code': self.raw_code[behavior_name],
+                'running': self.subsumption_controller.active_behavior_index == index
             })
         return json.dumps({'cmd': 'code_data', 'data': data})
-
-    def update_running_status(self):
-        pass
 
 
 class BrickManager(object):
@@ -126,21 +137,51 @@ class BrickManager(object):
         self._old_msg = defaultdict(lambda: {1: '', 2: '', 3: '', 4: ''})
         self.code_managers = {}
 
-    def add_code(self, address, name, code):
-        # TODO  maybe tell others about it as well here
+    def tell_others_about_it(self, address, data, client):
+        for other_clients in self._subscription_clients[address]:
+            if other_clients != client:
+                other_clients.send(data)
+
+    def runnable_callback(self, address, index):
+        print "New running", index
+        data = json.dumps({'cmd': 'running', 'title': self.code_managers[address].behaviors_names_list[index]})
+        for client in self._subscription_clients[address]:
+            client.send(data)
+
+    def run(self, address):
+        self.code_managers[address].subsumption_controller.start(True)
+
+    def stop(self, address):
+        self.code_managers[address].subsumption_controller.stop()
+
+    def pause(self, address):
+        self.code_managers[address].subsumption_controller.pause()
+
+    def add_code_bulk(self, address, bulk, client):
+        for code_module in bulk:
+            self.code_managers[address].add_behaviors(code_module['title'], code_module['code'])
+        self.tell_others_about_it(address, json.dumps({'cmd': 'code_data', 'data': bulk}), client)
+
+    def add_code(self, address, name, code, client):
         self.code_managers[address].add_behaviors(name, code)
+        self.tell_others_about_it(address,
+                                  json.dumps({'cmd': 'code_data', 'data': [{'title': name, 'code': code}]}),
+                                  client)
+
         print self.code_managers[address].subsumption_controller  # todo remove
 
-    def remove_code(self, address, name):
-        # TODO  maybe tell others about it as well here
+    def remove_code(self, address, name, client):
         self.code_managers[address].remove_behavior(name)
+        self.tell_others_about_it(address,
+                                  json.dumps({'cmd': 'remove_code', 'title': name}),
+                                  client)
 
     def is_brick_connected(self, address):
         return address in self._connected_brick
 
     def remove_old_subscription_from_brick(self, address, client):
         self._subscription_clients[address].remove(client)
-        self._old_msg.remove(client)
+        del self._old_msg[client]
 
     def remove_brick(self, address):
         print "brick got disconnected ", address
@@ -155,7 +196,9 @@ class BrickManager(object):
 
     def add_new_subscriptions_to_brick(self, address, client):
         if address not in self.code_managers:
-            self.code_managers[address] = CodeManager()
+            code_manager = CodeManager()
+            self.code_managers[address] = code_manager
+            code_manager.subsumption_controller.callback = functools.partial(self.runnable_callback, address)
         else:
             client.send(self.code_managers[address].code_package())
 
@@ -188,8 +231,8 @@ class BrickManager(object):
                     client.send(json.dumps({'cmd': 'sensor_data', 'data': data}))
             except socket.error:
                 self._subscription_clients[address].remove(client)
-            except Exception as e:  # todo: remove in the future
-                print "STRANGE EXCEPTION ON WEBSOCKET", type(e)
+            except Exception as e:
+                print "Strange exception on websockets", type(e)
                 print e
 
     def add_brick(self, address):
