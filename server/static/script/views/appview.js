@@ -75,8 +75,11 @@ define([
             else if (jsonData['cmd'] == 'remove_code') {
                 this.codeView.removeOne(jsonData['title'])
             }
-            else if(jsonData['cmd'] == 'running'){
+            else if (jsonData['cmd'] == 'running') {
                 this.codeView.newRunning(jsonData['title']);
+            }
+            else if (jsonData['cmd'] == 'error') {
+                this.$el.append(this.alertView.renderError(jsonData['data']).el);
             }
             else {
                 console.log("strange data");
@@ -101,7 +104,7 @@ define([
             this.connected = true;
         },
         onUnexpectedClose: function () {
-            this.$el.append(this.alertView.renderError("Can't connect to server").el);
+            this.$el.append(this.alertView.renderError("Server disconnected!").el);
             this.onClose();
         },
         onClose: function () {

@@ -25,7 +25,6 @@ class SubscriptionSocket(WebSocket):
             self.brick_manager.remove_old_subscription_from_brick(self.sub_address, self)
 
     def on_message(self):
-        print self.data
         try:
             json_data = json.loads(str(self.data))
             if json_data['cmd'] == 'subscribe':
@@ -52,8 +51,6 @@ class SubscriptionSocket(WebSocket):
                 self.brick_manager.run(self.sub_address)
             elif json_data['cmd'] == 'stop':
                 self.brick_manager.stop(self.sub_address)
-            elif json_data['cmd'] == 'pause':
-                self.brick_manager.pause(self.sub_address)
             else:
                 print "Strange json data received:", json_data
         except (ValueError, KeyError):
@@ -85,8 +82,8 @@ class CodeManager(object):
         self.raw_code = {}
         self.behaviors_names_list = []
 
-        self.expressions = {'Behavior': subsumption.Behavior}
-        self.default = {'Behavior': subsumption.Behavior}
+        self.expressions = {'Behavior': subsumption.Behavior, 'ev3': ev3}
+        self.default = {'Behavior': subsumption.Behavior, 'ev3': ev3}
 
         exec '' in self.expressions
         exec '' in self.default
@@ -101,13 +98,16 @@ class CodeManager(object):
 
     def add_behaviors(self, title, code):
         self.raw_code[title] = code
-        exec code in self.expressions
-
+        try:
+            exec code in self.expressions
+        except Exception as e:
+            return e
         for instance in set(self.expressions) - set(self.default):
             if inspect.isclass(self.expressions[instance]):
                 self.update_behavior(title, self.expressions[instance]())
                 break
         self.expressions = copy.copy(self.default)
+        return None
 
     def remove_behavior(self, title):
         if title in self.behaviors_names_list:
@@ -148,27 +148,37 @@ class BrickManager(object):
         for client in self._subscription_clients[address]:
             client.send(data)
 
+    def _run(self, address):
+        try:
+            self.code_managers[address].subsumption_controller.start()
+        except Exception as e:
+            self.tell_others_about_it(address, json.dumps({'cmd': 'error', 'data': str(e)}), None)
+
     def run(self, address):
-        self.code_managers[address].subsumption_controller.start(True)
+        thread = threading.Thread(name="Continuous behavior checker",
+                                  target=self._run, args=(address,))
+        thread.daemon = True
+        thread.start()
 
     def stop(self, address):
         self.code_managers[address].subsumption_controller.stop()
 
-    def pause(self, address):
-        self.code_managers[address].subsumption_controller.pause()
-
     def add_code_bulk(self, address, bulk, client):
         for code_module in bulk:
-            self.code_managers[address].add_behaviors(code_module['title'], code_module['code'])
+            exception = self.code_managers[address].add_behaviors(code_module['title'], code_module['code'])
+            if exception:
+                client.send(
+                    json.dumps({'cmd': 'error', 'data': 'In module ' + code_module['title'] + ' -> ' + str(exception)}))
+            return
         self.tell_others_about_it(address, json.dumps({'cmd': 'code_data', 'data': bulk}), client)
 
     def add_code(self, address, name, code, client):
-        self.code_managers[address].add_behaviors(name, code)
+        exception = self.code_managers[address].add_behaviors(name, code)
+        if exception:
+            client.send(json.dumps({'cmd': 'error', 'data': 'In module ' + name + ': ' + str(exception)}))
         self.tell_others_about_it(address,
                                   json.dumps({'cmd': 'code_data', 'data': [{'title': name, 'code': code}]}),
                                   client)
-
-        print self.code_managers[address].subsumption_controller  # todo remove
 
     def remove_code(self, address, name, client):
         self.code_managers[address].remove_behavior(name)

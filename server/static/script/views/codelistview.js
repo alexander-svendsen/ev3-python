@@ -30,8 +30,7 @@ define([
             'submit form': 'createCodeSnippet',
             'click #save': 'saveAllCodeToServer',
             'click #run': 'runCode',
-            'click #stop': 'stopCode',
-            'click #pause': 'pauseCode'
+            'click #stop': 'stopCode'
         },
         runCode: function () {
             this.saveAllCodeToServer();
@@ -40,16 +39,13 @@ define([
         stopCode: function () {
             this.socket.send(JSON.stringify({cmd: 'stop'}));
         },
-        pauseCode: function () {
-            this.socket.send(JSON.stringify({cmd: 'pause'}));
-        },
         saveAllCodeToServer: function () {
             if (this.selectedView) {
                 this.saveCodeInView();
             }
             var list = [];
             this.collection.forEach(function (code) {
-                if (code.hasChanged()) {
+                if (code.getChanged()) {
                     list.push(code.toJSON());
                 }
             });

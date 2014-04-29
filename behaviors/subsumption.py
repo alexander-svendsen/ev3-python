@@ -132,7 +132,12 @@ class Controller():
 
         while self._running:
             if self.active_behavior_index is not None:
-                self.behaviors[self.active_behavior_index].action()
+                running_behavior = self.active_behavior_index
+                self.behaviors[running_behavior].action()
+                if running_behavior == self.active_behavior_index:  # means the action got completed the old fashion way
+                    self.active_behavior_index = None
+                    self._find_and_set_new_active_behavior()
+
             elif self._return_when_no_action:
                 break
 
@@ -150,10 +155,7 @@ class Controller():
 
     def stop(self):
         self._running = False
-        self.behaviors = []
-
-    def pause(self):
-        self._running = False
+        self.behaviors[self.active_behavior_index].suppress()
 
     def _continuously_find_new_active_behavior(self):
         while self._running:
