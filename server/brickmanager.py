@@ -258,6 +258,12 @@ class BrickManager(object):
     def get_bricks(self):
         return self._connected_brick.keys()
 
+    def get_bricks_with_name(self):
+        bricks = []
+        for address, brick in self._connected_brick.iteritems():
+            bricks.append((address, str(brick)))
+        return bricks
+
     def open_sensor(self, brick_address, sensor_name, port):
         if brick_address in self._connected_brick:
             brick = self._connected_brick[brick_address]

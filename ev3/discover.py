@@ -14,6 +14,7 @@ def _is_brick_already_in_memory(address, port):
         return not _LOADED_BRICKS[(address, port)].closed
     return False
 
+
 def _stored_brick(address, port):
     _MODULE_LOGGER.debug("Brick found in memory, returning stored instance")
     return _LOADED_BRICKS[(address, port)]
@@ -45,7 +46,7 @@ def connect_to_brick(address, by_ip=True, by_bluetooth=True):
                     return _brick
 
                 except bluetooth.BluetoothError:
-                    raise error.BrickNotFoundException("Did you provide the correct bluetooth address and port?")
+                    raise error.BrickNotFoundException("Did you provide the correct bluetooth address?")
 
         except ImportError:
             pass
@@ -65,7 +66,7 @@ def connect_to_brick(address, by_ip=True, by_bluetooth=True):
 
             return _brick
         except:
-            raise error.BrickNotFoundException("Did you provide the correct ip address and port?")
+            raise error.BrickNotFoundException("Did you provide the correct ip address?")
 
     raise error.NoValidCommunicationChosenException("You must choose either ip or bluetooth as a communication option")
 
@@ -94,23 +95,24 @@ def find_brick_by_name(name, by_ip=True, by_bluetooth=True):
         try:
             import bluetooth
             import bluesocket
+            try:
+                socket = bluesocket.BlueSocket()
+                address = socket.get_address_by_hostname(hostname=name)
 
-            socket = bluesocket.BlueSocket()
-            address = socket.get_address_by_hostname(hostname=name)
+                _MODULE_LOGGER.debug("Found brick with bluetooth")
 
-            _MODULE_LOGGER.debug("Found brick with bluetooth")
+                if _is_brick_already_in_memory(address, config.BLUETOOTH_PORT):
+                    return _stored_brick(address, config.BLUETOOTH_PORT)
 
-            if _is_brick_already_in_memory(address, config.BLUETOOTH_PORT):
-                return _stored_brick(address, config.BLUETOOTH_PORT)
+                socket.connect(address, config.BLUETOOTH_PORT)
+                _brick = brick.Brick(socket)
 
-            socket.connect(address, config.BLUETOOTH_PORT)
-            _brick = brick.Brick(socket)
+                _store_brick_in_memory(address, config.BLUETOOTH_PORT, _brick)
 
-            _store_brick_in_memory(address, config.BLUETOOTH_PORT, _brick)
-
-            return _brick
-
-        except (ImportError, error.BrickNotFoundException, IOError, bluetooth.BluetoothError):
+                return _brick
+            except (error.BrickNotFoundException, bluetooth.BluetoothError):
+                pass
+        except (ImportError, IOError):
             pass
 
     raise error.BrickNotFoundException(

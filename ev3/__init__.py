@@ -14,7 +14,7 @@ channel.setFormatter(formatter)
 
 logger.addHandler(channel)
 
-from discover import connect_to_brick, find_brick_by_name
+from discover import connect_to_brick, find_brick_by_name, find_all_nearby_devices
 import discover
 
 from brick import Brick
