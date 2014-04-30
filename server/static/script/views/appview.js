@@ -31,7 +31,7 @@ define([
         events: {
             "click #connectButton": "connectOrDisconnect",
             "click #addBrickButton": "addBrick",
-            "click #openSensorButton": "openSensor"
+            "click #connectToSensorButton": "openSensor"
         },
         openSensor: function () {
             this.jsonRPC('/brick_manager', 'open_sensor',
