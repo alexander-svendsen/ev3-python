@@ -5,7 +5,6 @@ import socket
 class Communication(object):
     def __init__(self):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.settimeout()
 
     def connect(self, address, port):
         self._socket.connect((address, port))
