@@ -33,7 +33,6 @@ class AvoidColliding(behaviors.subsumption.Behavior):
         self.left_motor = ev3.Motor(connected_brick, ev3.MOTOR_PORTS.PORT_D)
         self.right_motor = ev3.Motor(connected_brick, ev3.MOTOR_PORTS.PORT_A)
         self.ultrasonic = ev3.EV3UltrasonicSensor(connected_brick, ev3.SENSOR_PORTS.PORT_1).get_distance_mode()
-        self.ignore_test = True
 
     def check(self):
         distance =  self.ultrasonic.fetch_sample()[0]
