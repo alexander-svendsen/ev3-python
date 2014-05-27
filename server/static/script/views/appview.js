@@ -34,8 +34,12 @@ define([
             "click #connectToSensorButton": "openSensor"
         },
         openSensor: function () {
-            this.jsonRPC('/brick_manager', 'open_sensor',
-                this.brickAddress, $('#sensorName').val().trim(), $('#portNumber').val().trim());
+            var data = {
+                cmd: 'open_sensor',
+                sensor_name: $('#sensorName').val().trim(),
+                port: $('#portNumber').val().trim()
+            };
+            this.socket.send(JSON.stringify(data))
         },
         addBrick: function () {
             var that = this;

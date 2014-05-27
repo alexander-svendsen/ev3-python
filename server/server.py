@@ -33,10 +33,10 @@ jsonrpc.register_remote_object('/brick_manager', _brick_manager, app)
 
 
 def main():
-    brick = ev3.connect_to_brick('10.0.1.1')
-    ultrasonic = ev3.EV3UltrasonicSensor(brick, 1)
+    # brick = ev3.connect_to_brick('10.0.1.1')
+    # ultrasonic = ev3.EV3UltrasonicSensor(brick, 1)
     # touch = ev3.EV3TouchSensor(brick, 4)
-    _brick_manager.add_brick('10.0.1.1')
+    # _brick_manager.add_brick('10.0.1.1')
     print "Starting websocket server"
     web_socket = functools.partial(brickmanager.SubscriptionSocket, _brick_manager)
     server = SimpleWebSocketServer('', 9999, web_socket)

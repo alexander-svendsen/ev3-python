@@ -47,6 +47,8 @@ class SubscriptionSocket(WebSocket):
                 self.brick_manager.add_code_bulk(self.sub_address, json_data['data'], self)
             elif json_data['cmd'] == 'remove_code':
                 self.brick_manager.remove_code(self.sub_address, json_data['title'], self)
+            elif json_data['cmd'] == 'open_sensor':
+                self.brick_manager.open_sensor(self.sub_address, json_data['sensor_name'], json_data['port'])
             elif json_data['cmd'] == 'run':
                 self.brick_manager.run(self.sub_address)
             elif json_data['cmd'] == 'stop':
