@@ -46,18 +46,12 @@ class Controller():
     method. The other is to take care of the scheduler by yourself, by using the step() method
     """
 
-    def __init__(self, return_when_no_action, behaviors=None):
+    def __init__(self, return_when_no_action):
         """
         Initialize the object. Notice the subsumption module is not bound to a specific brick, the behaviors are. This
         makes it possible to have a subsumption module responsible for multiple bricks at the same time, if desirable.
-
-        @param behaviors: list of behaviors. Their priority is based on their order. The first has the highest, while
-        the last has the lowest.
         """
-        if behaviors:
-            self.behaviors = behaviors
-        else:
-            self.behaviors = []
+        self.behaviors = []
         self.wait_object = threading.Event()
         self.active_behavior_index = None
 

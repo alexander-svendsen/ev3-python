@@ -15,9 +15,9 @@ class Subscription(object):
     NOTE: usage is a little different from how the modules usually interacts with the brick, since the brick
     must take it in instead of the other way
     """
-    def __init__(self, subscribe_on_sensor_changes=True, subscribe_on_stream_data=True):
+    def __init__(self, subscribe_on_sensor_changes=True, subscribe_on_sample_data=True):
         self._subscribe_on_sensor_changes = subscribe_on_sensor_changes
-        self._subscribe_on_stream_data = subscribe_on_stream_data
+        self._subscribe_on_stream_data = subscribe_on_sample_data
 
         self.callbacks = collections.defaultdict(list)
         self.stream_callback = collections.defaultdict(list)

@@ -39,3 +39,7 @@ class MotorNotConnectedException(Exception):
 
 class InvalidMotorPortException(Exception):
     pass
+
+
+class ModeNotSelected(Exception):
+    pass

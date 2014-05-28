@@ -50,7 +50,6 @@ class MessageHandler(object):
         self._thread.start()
         self._send_lock = threading.Lock()
 
-
     def set_callback(self, callback):
         self._callback = callback
 
@@ -113,7 +112,9 @@ class MessageHandler(object):
             self._message_queue[seq].wait()
         message = self._message_queue[seq].msg
         del self._message_queue[seq]
-        del message["seq"]  # to hide seq from the users point of view
+
+        if "seq" in message:
+            del message["seq"]  # to hide seq from the users point of view
         return message
 
     def close(self):

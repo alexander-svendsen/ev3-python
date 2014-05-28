@@ -7,11 +7,11 @@ import flask
 
 import ev3
 import jsonrpc
-import brickmanager
+import managers
 from lib.simplewebsocketserver import SimpleWebSocketServer
 
 
-_brick_manager = brickmanager.BrickManager()
+_brick_manager = managers.BrickManager()
 
 app = flask.Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # todo remove in the future
@@ -38,7 +38,7 @@ def main():
     # touch = ev3.EV3TouchSensor(brick, 4)
     # _brick_manager.add_brick('10.0.1.1')
     print "Starting websocket server"
-    web_socket = functools.partial(brickmanager.SubscriptionSocket, _brick_manager)
+    web_socket = functools.partial(managers.SubscriptionSocket, _brick_manager)
     server = SimpleWebSocketServer('', 9999, web_socket)
     _thread = threading.Thread(name="receive_thread", target=server.serveforever, args=())
     _thread.daemon = True

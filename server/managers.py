@@ -77,8 +77,6 @@ class SubscriptionSocket(WebSocket):
 
 
 class CodeManager(object):
-    """manages the code instances"""
-
     def __init__(self):
         self.subsumption_controller = subsumption.Controller(return_when_no_action=False)
         self.raw_code = {}

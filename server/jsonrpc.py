@@ -19,9 +19,7 @@ def register_remote_object(path, obj, app):
 
     @app.route(path, methods=['POST'])
     def jsonrpc(**kwargs):
-
         req = flask.request.json
-
         try:
             name = req['method']
             method = getattr(obj, name)

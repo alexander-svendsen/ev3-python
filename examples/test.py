@@ -3,30 +3,32 @@ import time
 import ev3
 import threading
 
-
-iterations = 0
-
-brick = ev3.connect_to_brick(address='10.0.1.1')
-
-
-def time_that():
-    global iterations
-    while True:
-        time.sleep(1)
-        print iterations
-        iterations = 0
-
+print "starting"
+time.sleep(1000)
+# brick = ev3.connect_to_brick(address='10.0.1.1')
+brick = ev3.connect_to_brick('00:16:53:3D:E4:77')
 
 ultrasonic = ev3.EV3UltrasonicSensor(brick, 1)
 distance = ultrasonic.get_selected_mode()
+print "opened ultrasonic"
 
-_thread = threading.Thread(target=time_that, args=())
-_thread.daemon = True
-_thread.start()
+def time_that(iterations):
+    time_taken = 0.0
+    for _ in range(iterations + 1):
+        start = time.time()
+        sample = distance.fetch_sample()
+        end = time.time()
+        time_taken += end - start
+        print (end - start, sample)
 
-while True:
-    distance.fetch_sample()
-    iterations += 1
+    print "time taken", time_taken
+    print "avg time", time_taken / iterations
+
+print "Starting timer"
+time_that(100000)
+
+
+
 
 
 

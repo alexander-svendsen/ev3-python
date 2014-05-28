@@ -15,6 +15,7 @@ class Mode(object):
         @type sensor: Sensor
         """
         self._sensor = sensor
+        self._running = False
 
     def fetch_sample(self):
         """
@@ -22,6 +23,8 @@ class Mode(object):
         @return: List with the resulting sample(s)
         @rtype: list[float]
         """
+        if not self._running:
+            raise ModeNotSelected("This mode is no longer selected, you need to reselect first!")
         return self._sensor.get_raw_data()
 
     def get_name(self):
@@ -45,6 +48,11 @@ class Mode(object):
     def __str__(self):
         return self.get_name()
 
+    def _open(self):
+        self._running = True
+
+    def _close(self):
+        self._running = False
 
 class Sensor(object):
     initialized = False
@@ -137,8 +145,10 @@ class Sensor(object):
             raise InvalidModeSelected("Mode must either be int or str")
 
         if new_selected_mode != self._selected_mode:
+            self._selected_mode._close()
             self._selected_mode = new_selected_mode
             self._send_command("set_mode", mode=new_selected_mode)
+            self._selected_mode._open()
 
     def get_mode(self, mode):
         """
