@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import socket
 import threading
 import json
 import logging
+import error
 
 _MODULE_LOGGER = logging.getLogger('ev3.asynchronous')
 _MAX_SEQ = 65000
@@ -100,7 +102,10 @@ class MessageHandler(object):
                 self._message_queue[seq] = Message()
 
             data["seq"] = seq
-            self._communication_method.send(json.dumps(data) + '\n')
+            try:
+                self._communication_method.send(json.dumps(data) + '\n')
+            except socket.error:
+                raise error.BrickNotConnectedException("Brick no longer connected")
 
         del data["seq"]  # to hide seq from the users point of view
         return seq

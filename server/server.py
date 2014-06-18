@@ -5,16 +5,16 @@ import threading
 
 import flask
 
-import ev3
 import jsonrpc
 import managers
 from lib.simplewebsocketserver import SimpleWebSocketServer
 
 
+
 _brick_manager = managers.BrickManager()
 
 app = flask.Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # todo remove in the future
+# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 
 def status(code):
@@ -33,10 +33,6 @@ jsonrpc.register_remote_object('/brick_manager', _brick_manager, app)
 
 
 def main():
-    # brick = ev3.connect_to_brick('10.0.1.1')
-    # ultrasonic = ev3.EV3UltrasonicSensor(brick, 1)
-    # touch = ev3.EV3TouchSensor(brick, 4)
-    # _brick_manager.add_brick('10.0.1.1')
     print "Starting websocket server"
     web_socket = functools.partial(managers.SubscriptionSocket, _brick_manager)
     server = SimpleWebSocketServer('', 9999, web_socket)

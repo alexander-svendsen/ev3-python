@@ -100,11 +100,14 @@ class Brick(object):
         open_ports = self._opened_ports.keys()
         for port in open_ports:
             self._opened_ports[port].close()
-        if self.subscription.running:
+        if self.subscription and self.subscription.running:
             self.subscription.close()
 
         self._message_handler.close()
         self.closed = True
+
+    def ping(self):
+        return self.send_command({"cla": "ping"})["sample_string"]
 
     def __del__(self):
         self.close()

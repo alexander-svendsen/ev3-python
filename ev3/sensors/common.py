@@ -145,10 +145,10 @@ class Sensor(object):
             raise InvalidModeSelected("Mode must either be int or str")
 
         if new_selected_mode != self._selected_mode:
-            self._selected_mode._close()
+            self._available_modes[self._selected_mode]._close()
             self._selected_mode = new_selected_mode
             self._send_command("set_mode", mode=new_selected_mode)
-            self._selected_mode._open()
+        self._available_modes[self._selected_mode]._open()
 
     def get_mode(self, mode):
         """
